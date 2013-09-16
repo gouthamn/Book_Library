@@ -69,6 +69,7 @@
 		6D7D723B17E6CAAC003C33DD /* zbar-help.html in Resources */ = {isa = PBXBuildFile; fileRef = 6D7D71FC17E6CAAC003C33DD /* zbar-help.html */; };
 		6D7D723C17E6CAAC003C33DD /* zbar-helpicons.png in Resources */ = {isa = PBXBuildFile; fileRef = 6D7D71FD17E6CAAC003C33DD /* zbar-helpicons.png */; };
 		6D7D723D17E6CAAC003C33DD /* zbar-samples.png in Resources */ = {isa = PBXBuildFile; fileRef = 6D7D71FE17E6CAAC003C33DD /* zbar-samples.png */; };
+		6D7D724017E6E1F2003C33DD /* libiconv.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 6D7D723F17E6E1F2003C33DD /* libiconv.dylib */; };
 		6DB0C6A417E6C59D00689BF1 /* libsqlite3.0.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 6DB0C6A317E6C59D00689BF1 /* libsqlite3.0.dylib */; };
 		6DB0C6A617E6C5A900689BF1 /* CoreMedia.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6DB0C6A517E6C5A900689BF1 /* CoreMedia.framework */; };
 		6DB0C6A817E6C5B300689BF1 /* CoreVideo.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6DB0C6A717E6C5B300689BF1 /* CoreVideo.framework */; };
@@ -180,6 +181,7 @@
 		6D7D71FC17E6CAAC003C33DD /* zbar-help.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = "zbar-help.html"; sourceTree = "<group>"; };
 		6D7D71FD17E6CAAC003C33DD /* zbar-helpicons.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "zbar-helpicons.png"; sourceTree = "<group>"; };
 		6D7D71FE17E6CAAC003C33DD /* zbar-samples.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "zbar-samples.png"; sourceTree = "<group>"; };
+		6D7D723F17E6E1F2003C33DD /* libiconv.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libiconv.dylib; path = usr/lib/libiconv.dylib; sourceTree = SDKROOT; };
 		6DB0C6A317E6C59D00689BF1 /* libsqlite3.0.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libsqlite3.0.dylib; path = usr/lib/libsqlite3.0.dylib; sourceTree = SDKROOT; };
 		6DB0C6A517E6C5A900689BF1 /* CoreMedia.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreMedia.framework; path = System/Library/Frameworks/CoreMedia.framework; sourceTree = SDKROOT; };
 		6DB0C6A717E6C5B300689BF1 /* CoreVideo.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreVideo.framework; path = System/Library/Frameworks/CoreVideo.framework; sourceTree = SDKROOT; };
@@ -197,6 +199,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				6D7D724017E6E1F2003C33DD /* libiconv.dylib in Frameworks */,
 				6DB0C6AA17E6C6F400689BF1 /* QuartzCore.framework in Frameworks */,
 				6DB0C6A817E6C5B300689BF1 /* CoreVideo.framework in Frameworks */,
 				6DB0C6A617E6C5A900689BF1 /* CoreMedia.framework in Frameworks */,
@@ -410,6 +413,7 @@
 		F4EECF05177C99F400778578 = {
 			isa = PBXGroup;
 			children = (
+				6D7D723F17E6E1F2003C33DD /* libiconv.dylib */,
 				6D7D718F17E6CAAC003C33DD /* BookLibrary */,
 				6DB0C6A917E6C6F400689BF1 /* QuartzCore.framework */,
 				6DB0C6A717E6C5B300689BF1 /* CoreVideo.framework */,

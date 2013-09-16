@@ -17,5 +17,7 @@
 }
 @property (nonatomic,retain) IBOutlet NSMutableArray *outputarray;
 @property (nonatomic,retain) IBOutlet NSMutableArray *tabledatasource;
-
+@property (nonatomic,retain) IBOutlet UIButton *lend;
+@property (nonatomic,retain) IBOutlet UIButton *borrow;
+@property (nonatomic,retain) IBOutlet UIButton *ret;
 @end

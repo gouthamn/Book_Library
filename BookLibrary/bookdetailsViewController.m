@@ -13,7 +13,7 @@
 @end
 
 @implementation bookdetailsViewController
-@synthesize outputarray,tabledatasource;
+@synthesize outputarray,tabledatasource,lend,borrow,ret;
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
     self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];

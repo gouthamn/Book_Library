@@ -29,7 +29,7 @@
     NSArray *documentPaths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
 	NSString *documentsDir = [documentPaths objectAtIndex:0];
   NSString *localPath = [[[NSBundle mainBundle] resourcePath] stringByAppendingPathComponent:@"library.sqlite"];
-
+    NSLog(@"goutham");
     NSError *error;
 	databasePath = [documentsDir stringByAppendingPathComponent:@"library.sqlite"];
 

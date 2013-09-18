@@ -101,26 +101,84 @@
 }
 -(void)actionSheet:(UIActionSheet *)actionSheet clickedButtonAtIndex:(NSInteger)buttonIndex
 {
-    if (buttonIndex==-1) {
+    NSLog(@"%d",buttonIndex);
+    if (buttonIndex==4) {
         
     }
     else
     {
-        if(buttonIndex==0)
-        {
-            
         UIStoryboard *storyboard=[UIStoryboard storyboardWithName:@"MainStoryboard" bundle:nil];
         bookdetailsViewController *bookdetails=[storyboard instantiateViewControllerWithIdentifier:@"bookdetails"];
-            bookdetails.borrow.enabled=false;
-            bookdetails.ret.enabled=false;
-        [self.navigationController pushViewController:bookdetails animated:YES];
+        if(buttonIndex==0)
+        {
+            bookdetails.flag=1;
+            NSURL* jsonURL = [NSURL URLWithString:@"https://www.googleapis.com/books/v1/volumes?q=isbn:0735619670"];
+            dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+                NSData* data = [NSData dataWithContentsOfURL:
+                                jsonURL];
+                [self performSelectorOnMainThread:@selector(fetchedData:)
+                                       withObject:data waitUntilDone:YES];
+            });
             
+      
         }
         else if (buttonIndex==1)
         {
+            bookdetails.flag=2;
             
         }
+        else if (buttonIndex == 2)
+        {
+            bookdetails.flag=3;
+        }
+        else
+        {
+            bookdetails.flag=4;
+        }
+        [self.navigationController pushViewController:bookdetails animated:YES];
+
     }
+}
+- (void)fetchedData:(NSData *)responseData {
+    //parse out the json data
+    NSError* error;
+    NSDictionary* json = [NSJSONSerialization
+                          JSONObjectWithData:responseData //1
+                          
+                          options:kNilOptions
+                          error:&error];
+    if (json != nil &&
+        error == nil){
+        //extracting data from json object
+        NSLog(@"Successfully deserialized...");
+        NSString *publisher;
+        NSString *author;
+        NSString *category;
+        NSString *description;
+        NSString *rating;
+        NSString *isbn;
+        NSString *imgURL;
+        NSString *title;
+        NSDictionary* items = [json objectForKey:@"items"];
+        for(NSDictionary *dict in items)
+        {
+            title= [[  dict objectForKey:@"volumeInfo"] objectForKey:@"publisher"] ;
+            publisher  = [[  dict objectForKey:@"volumeInfo"] objectForKey:@"publisher"] ;
+            author     = [[[ dict objectForKey:@"volumeInfo"] objectForKey:@"authors"]objectAtIndex:0];
+            category   = [[[ dict objectForKey:@"volumeInfo"] objectForKey:@"categories"]objectAtIndex:0];
+            description= [[  dict objectForKey:@"volumeInfo"] objectForKey:@"description"];
+            rating     = [[  dict objectForKey:@"volumeInfo"] objectForKey:@"averageRating"];
+            isbn       = [[[[dict objectForKey:@"volumeInfo"] objectForKey:@"industryIdentifiers"]objectAtIndex:1]objectForKey:@"identifier"];
+            imgURL     = [[[ dict objectForKey:@"volumeInfo"] objectForKey:@"imageLinks"] objectForKey:@"thumbnail"];
+        }
+    NSString *img;
+    NSArray* latestLoans = [json objectForKey:@"items"]; //2
+    for(NSDictionary *dict in latestLoans)
+    {
+        img=[[[dict objectForKey:@"volumeInfo"] objectForKey:@"imageLinks"] objectForKey:@"thumbnail"];
+    }
+    [DBManager getSharedInstance];
+}
 }
 - (void) imagePickerController: (UIImagePickerController*) reader
  didFinishPickingMediaWithInfo: (NSDictionary*) info

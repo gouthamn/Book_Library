@@ -8,16 +8,18 @@
 
 #import <UIKit/UIKit.h>
 #import "DLStarRatingControl.h"
-@interface bookdetailsViewController : UIViewController<UITableViewDataSource,UITableViewDelegate,DLStarRatingDelegate>
+@interface bookdetailsViewController : UIViewController<UITableViewDataSource,UITableViewDelegate,DLStarRatingDelegate,UIActionSheetDelegate,UIPickerViewDataSource,UIPickerViewDelegate>
 {
     NSMutableArray *outputarray;
     NSMutableArray *tabledatasource;
     NSArray *headers;
      DLStarRatingControl *customnumberofstars;
+    int flag;
+    UIActionSheet *action;
 }
 @property (nonatomic,retain) IBOutlet NSMutableArray *outputarray;
 @property (nonatomic,retain) IBOutlet NSMutableArray *tabledatasource;
-@property (nonatomic,retain) IBOutlet UIButton *lend;
-@property (nonatomic,retain) IBOutlet UIButton *borrow;
-@property (nonatomic,retain) IBOutlet UIButton *ret;
+@property (nonatomic,strong) IBOutlet UIPickerView *pickerview;
+@property (nonatomic,retain) IBOutlet NSMutableArray *pickersource;
+@property (nonatomic,assign) int flag;
 @end

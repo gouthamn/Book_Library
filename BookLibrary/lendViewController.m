@@ -13,7 +13,7 @@
 @end
 
 @implementation lendViewController
-@synthesize datepicker,emailid,date,name,popoverController;
+@synthesize datepicker,emailid,date,name,popoverController,pagetitle;
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
     self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
@@ -26,9 +26,8 @@
 - (void)viewDidLoad
 {
     [super viewDidLoad];
-  //  emailid.returnKeyType=UIReturnKeyDefault;
-   // name.returnKeyType=UIReturnKeyDefault;
-    self.title=@"Lend Book";
+  
+    self.title=pagetitle;
     UIBarButtonItem *bar=[[UIBarButtonItem alloc] initWithTitle:@"Done" style:UIBarButtonItemStyleDone target:self action:@selector(submit:)];
     self.navigationItem.rightBarButtonItems=[NSArray arrayWithObject:bar];
    // UIBarButtonItem *btn = [[UIBarButtonItem alloc] initWithImage:[UIImage imageNamed:@"back-button.png"] style:UIBarButtonItemStyleBordered target:self action:nil];
@@ -36,9 +35,11 @@
     //[self.navigationItem setBackBarButtonItem:btn];
 	// Do any additional setup after loading the view.
 }
--(void)textFieldDidEndEditing:(UITextField *)textField
+-(BOOL)textFieldShouldReturn:(UITextField *)textField
 {
+   
     [textField resignFirstResponder];
+    return YES;
 }
 -(IBAction)submit:(id)sender
 {

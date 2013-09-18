@@ -7,7 +7,7 @@
 //
 
 #import "AppDelegate.h"
-
+#import "DBManager.h"
 @implementation AppDelegate
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
@@ -23,6 +23,8 @@
                                                            [NSValue valueWithUIOffset:UIOffsetMake(0, 0)],
                                                            UITextAttributeTextShadowOffset,
                                                            [UIFont fontWithName:@"Helvetica-Light" size:20.0], UITextAttributeFont, nil]];
+   bool i= [DBManager getSharedInstance];
+    NSLog(@"%d",i);
     
     return YES;
 }

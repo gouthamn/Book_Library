@@ -129,8 +129,17 @@ shouldReloadTableForSearchScope:(NSInteger)searchOption
 -(void)tableView:(UITableView *)tableView commitEditingStyle:(UITableViewCellEditingStyle)editingStyle forRowAtIndexPath:(NSIndexPath *)indexPath{
     
     if(editingStyle == UITableViewCellEditingStyleDelete){
+        UIAlertView *alertview=[[UIAlertView alloc] initWithTitle:@"Enter Number of copies" message:@"Number of copies available:1" delegate:self cancelButtonTitle:@"cancel" otherButtonTitles:@"Delete", nil ];
+        alertview.alertViewStyle=UIAlertViewStylePlainTextInput;
         
+        [alertview show];
     }
+}
+-(void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex
+{
+    int i=[[[alertView textFieldAtIndex:0] text] intValue];
+    NSLog(@"%d",i);
+    //[tableView deleteRowsAtIndexPaths:[NSArray arrayWithObject:indexPath] withRowAnimation:UITableViewRowAnimationFade];
 }
 -(void)viewWillAppear:(BOOL)animated
 {

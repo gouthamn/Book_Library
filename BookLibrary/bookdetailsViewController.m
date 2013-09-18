@@ -8,12 +8,13 @@
 
 #import "bookdetailsViewController.h"
 #import "tablecell.h"
+#import "lendViewController.h"
 @interface bookdetailsViewController ()
 
 @end
 
 @implementation bookdetailsViewController
-@synthesize outputarray,tabledatasource,lend,borrow,ret;
+@synthesize outputarray,tabledatasource,flag,pickerview,pickersource;
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
     self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
@@ -29,12 +30,28 @@
     self.title=@"Book Details";
     headers=@[@"Author",@"Publisher",@"Genre",@"Description",@"Status"];
     tabledatasource=[[NSMutableArray alloc] initWithObjects:@"Dave Mark & Jeff Lavarche",@"Apress(July21,2009)",@"computers",@"Features the best practices in the art and science of constructing software--topics include design, applying good techniques to construction, eliminating errors, planning, managing construction activities, and relating personal character to superior software. Original. (Intermediate)",@"Available", nil];
+    pickersource=[[NSMutableArray alloc] initWithObjects:@"abc",@"kjnjk",@"uiweui",@"jknjk", nil];
+    
+    UIBarButtonItem *bar=[[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemAdd target:self action:@selector(addcopies)];
+    self.navigationItem.rightBarButtonItems=[NSArray arrayWithObject:bar];
    // UIBarButtonItem *btn = [[UIBarButtonItem alloc] initWithImage:[UIImage imageNamed:@"back-button.png"] style:UIBarButtonItemStylePlain target:self action:nil];
     
    // [self.navigationItem setLeftBarButtonItem:btn];
 	// Do any additional setup after loading the view.
 }
-
+-(void)addcopies
+{
+    UIAlertView *alertview=[[UIAlertView alloc] initWithTitle:@"Enter Number of copies to add" message:@"Number of copies available:1" delegate:self cancelButtonTitle:@"cancel" otherButtonTitles:@"Add", nil ];
+    alertview.alertViewStyle=UIAlertViewStylePlainTextInput;
+    
+    [alertview show];
+}
+-(void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex
+{
+    int i=[[[alertView textFieldAtIndex:0] text] intValue];
+    NSLog(@"%d",i);
+    
+}
 - (void)didReceiveMemoryWarning
 {
     [super didReceiveMemoryWarning];
@@ -56,7 +73,7 @@
     tablecell *cell = [tableView
                        dequeueReusableCellWithIdentifier:CellIdentifier];
     UITableViewCell *cell1=[tableView dequeueReusableCellWithIdentifier:@"Cell"];
-    UITableViewCell *cell2=[tableView dequeueReusableCellWithIdentifier:@"Cell2"];
+    tablecell *cell2=[tableView dequeueReusableCellWithIdentifier:@"Cell2"];
     if (cell == nil)
     {
         cell = [[tablecell alloc]
@@ -71,7 +88,7 @@
     }
     if (cell2 == nil)
     {
-        cell2 = [[UITableViewCell alloc]
+        cell2 = [[tablecell alloc]
                  initWithStyle:UITableViewCellStyleDefault
                  reuseIdentifier:@"Cell2"];
     }
@@ -94,6 +111,31 @@
             return cell;
             break;
          case 6:
+            NSLog(@"%d",flag);
+            switch (flag) {
+                case 1:
+                    cell2.borrow.enabled=false;
+                    cell2.ret.enabled=false;
+                    cell2.lend.enabled=true;
+                    break;
+                case 2:
+                    cell2.borrow.enabled=false;
+                    cell2.ret.enabled=false;
+                    cell2.lend.enabled=true;
+                    break;
+                case 3:
+                    cell2.borrow.enabled=true;
+                    cell2.ret.enabled=false;
+                    cell2.lend.enabled=false;
+                    break;
+                case 4:
+                    cell2.borrow.enabled=false;
+                    cell2.ret.enabled=true;
+                    cell2.lend.enabled=false;
+                    break;
+                default:
+                    break;
+            }
             return cell2;
             break;
         default:
@@ -123,6 +165,90 @@
         return expsize.height+30;
     }
     
+}
+-(IBAction)takebook:(id)sender
+{
+   action = [[UIActionSheet alloc] initWithTitle:@"Select Email ID"
+                                       delegate:self
+                              cancelButtonTitle:nil
+                         destructiveButtonTitle:nil
+                              otherButtonTitles:nil];
+    //action.actionSheetStyle=UIActionSheetStyleBlackOpaque;
+   
+    pickerview=[[UIPickerView alloc] initWithFrame:CGRectMake(0, 40, 320, 216)];
+    pickerview.delegate=self;
+    pickerview.dataSource=self;
+    pickerview.showsSelectionIndicator=YES;
+
+   
+  
+    
+    UIToolbar *pickerToolbar = [[UIToolbar alloc] initWithFrame:CGRectMake(0, 0, 320, 40)];
+    pickerToolbar.barStyle = UIBarStyleBlackOpaque;
+    [pickerToolbar sizeToFit];
+    
+    NSMutableArray *barItems = [[NSMutableArray alloc] init];
+    
+    UIBarButtonItem *flexSpace = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace target:self action:nil];
+    [barItems addObject:flexSpace];
+    UIBarButtonItem *cancelBtn = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemCancel target:self action:@selector(cancel:)];
+    [barItems addObject:cancelBtn];
+    UIBarButtonItem *doneBtn = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemDone target:self action:@selector(doneButtonPressed:)];
+    [barItems addObject:doneBtn];
+    
+    
+    [pickerToolbar setItems:barItems animated:YES];
+    
+    [action addSubview:pickerview];
+    [action addSubview:pickerToolbar];
+    
+    [action showInView:self.view];
+    [action setBounds:CGRectMake(0,0,320,450)];
+  /*  CGRect pickerRect = pickerview.bounds;
+    pickerRect.origin.y = -40;
+    pickerview.bounds = pickerRect;*/
+}
+
+-(IBAction)doneButtonPressed:(UIDatePicker*)sender
+{
+    [action dismissWithClickedButtonIndex:0 animated:YES];
+    
+}
+-(IBAction)cancel:(id)sender
+{
+     [action dismissWithClickedButtonIndex:0 animated:YES];
+}
+- (NSInteger)numberOfComponentsInPickerView:(UIPickerView *)pickerView
+{
+    return 1;
+}
+
+// returns the # of rows in each component..
+- (NSInteger)pickerView:(UIPickerView *)pickerView numberOfRowsInComponent: (NSInteger)component
+{
+    return [pickersource count];
+}
+-(NSString *)pickerView:(UIPickerView *)pickerView titleForRow:(NSInteger)row forComponent:(NSInteger)component
+{
+    
+    return [self.pickersource objectAtIndex:row];
+    
+}
+- (void)pickerView:(UIPickerView *)pickerView didSelectRow:(NSInteger)row   inComponent:(NSInteger)component{
+    NSLog(@"%@",[pickersource objectAtIndex:row]);
+}
+-(void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender
+{
+    UIButton *button=(UIButton*)sender;
+    lendViewController *lend=[segue destinationViewController];
+    if(button.tag==0)
+    {
+        lend.pagetitle=@"Lend Book";
+    }
+    else
+    {
+    lend.pagetitle=@"Borrow Book";
+    }
 }
 
 @end

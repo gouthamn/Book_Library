@@ -8,6 +8,7 @@
 
 #import <UIKit/UIKit.h>
 #import "ZBarSDK.h"
+#import "DBManager.h"
 @interface scanViewController : UIViewController<ZBarReaderDelegate,UIActionSheetDelegate,UITextFieldDelegate>
 {
     UIImageView *resultImage;

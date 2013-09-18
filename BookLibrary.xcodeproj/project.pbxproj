@@ -70,6 +70,8 @@
 		6D7D723C17E6CAAC003C33DD /* zbar-helpicons.png in Resources */ = {isa = PBXBuildFile; fileRef = 6D7D71FD17E6CAAC003C33DD /* zbar-helpicons.png */; };
 		6D7D723D17E6CAAC003C33DD /* zbar-samples.png in Resources */ = {isa = PBXBuildFile; fileRef = 6D7D71FE17E6CAAC003C33DD /* zbar-samples.png */; };
 		6D7D724017E6E1F2003C33DD /* libiconv.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 6D7D723F17E6E1F2003C33DD /* libiconv.dylib */; };
+		6D8A8C0517E86D5E0080A8D7 /* MessageUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6D8A8C0417E86D5D0080A8D7 /* MessageUI.framework */; };
+		6DA8FF8917E96A4000C8A84B /* DBManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 6DA8FF8817E96A4000C8A84B /* DBManager.m */; };
 		6DB0C6A417E6C59D00689BF1 /* libsqlite3.0.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 6DB0C6A317E6C59D00689BF1 /* libsqlite3.0.dylib */; };
 		6DB0C6A617E6C5A900689BF1 /* CoreMedia.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6DB0C6A517E6C5A900689BF1 /* CoreMedia.framework */; };
 		6DB0C6A817E6C5B300689BF1 /* CoreVideo.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6DB0C6A717E6C5B300689BF1 /* CoreVideo.framework */; };
@@ -182,6 +184,9 @@
 		6D7D71FD17E6CAAC003C33DD /* zbar-helpicons.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "zbar-helpicons.png"; sourceTree = "<group>"; };
 		6D7D71FE17E6CAAC003C33DD /* zbar-samples.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "zbar-samples.png"; sourceTree = "<group>"; };
 		6D7D723F17E6E1F2003C33DD /* libiconv.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libiconv.dylib; path = usr/lib/libiconv.dylib; sourceTree = SDKROOT; };
+		6D8A8C0417E86D5D0080A8D7 /* MessageUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MessageUI.framework; path = System/Library/Frameworks/MessageUI.framework; sourceTree = SDKROOT; };
+		6DA8FF8717E96A4000C8A84B /* DBManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DBManager.h; sourceTree = "<group>"; };
+		6DA8FF8817E96A4000C8A84B /* DBManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DBManager.m; sourceTree = "<group>"; };
 		6DB0C6A317E6C59D00689BF1 /* libsqlite3.0.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libsqlite3.0.dylib; path = usr/lib/libsqlite3.0.dylib; sourceTree = SDKROOT; };
 		6DB0C6A517E6C5A900689BF1 /* CoreMedia.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreMedia.framework; path = System/Library/Frameworks/CoreMedia.framework; sourceTree = SDKROOT; };
 		6DB0C6A717E6C5B300689BF1 /* CoreVideo.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreVideo.framework; path = System/Library/Frameworks/CoreVideo.framework; sourceTree = SDKROOT; };
@@ -199,6 +204,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				6D8A8C0517E86D5E0080A8D7 /* MessageUI.framework in Frameworks */,
 				6D7D724017E6E1F2003C33DD /* libiconv.dylib in Frameworks */,
 				6DB0C6AA17E6C6F400689BF1 /* QuartzCore.framework in Frameworks */,
 				6DB0C6A817E6C5B300689BF1 /* CoreVideo.framework in Frameworks */,
@@ -245,9 +251,11 @@
 				6D7D71D017E6CAAC003C33DD /* scanViewController.m */,
 				6D7D71D217E6CAAC003C33DD /* SidebarViewController.h */,
 				6D7D71D317E6CAAC003C33DD /* SidebarViewController.m */,
-				6D7D71DB17E6CAAC003C33DD /* tablecell.h */,
 				6D7D71DC17E6CAAC003C33DD /* tablecell.m */,
+				6D7D71DB17E6CAAC003C33DD /* tablecell.h */,
 				6D7D723E17E6CB36003C33DD /* Supporting Files */,
+				6DA8FF8717E96A4000C8A84B /* DBManager.h */,
+				6DA8FF8817E96A4000C8A84B /* DBManager.m */,
 			);
 			path = BookLibrary;
 			sourceTree = "<group>";
@@ -413,6 +421,7 @@
 		F4EECF05177C99F400778578 = {
 			isa = PBXGroup;
 			children = (
+				6D8A8C0417E86D5D0080A8D7 /* MessageUI.framework */,
 				6D7D723F17E6E1F2003C33DD /* libiconv.dylib */,
 				6D7D718F17E6CAAC003C33DD /* BookLibrary */,
 				6DB0C6A917E6C6F400689BF1 /* QuartzCore.framework */,
@@ -566,6 +575,7 @@
 				6D7D722E17E6CAAC003C33DD /* SidebarViewController.m in Sources */,
 				6D7D723317E6CAAC003C33DD /* SWRevealViewController.m in Sources */,
 				6D7D723417E6CAAC003C33DD /* tablecell.m in Sources */,
+				6DA8FF8917E96A4000C8A84B /* DBManager.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -13,6 +13,14 @@
 {
     UIImageView *resultImage;
     UITextField *resultText;
+    NSString *publisher;
+    NSString *author;
+    NSString *category;
+    NSString *description;
+    NSString *rating;
+    NSString *imgURL;
+    NSString *title;
+    NSData *imgdata;
 }
 @property (nonatomic, retain) IBOutlet UIImageView *resultImage;
 @property (nonatomic, retain) IBOutlet UITextField *resultText;

@@ -15,7 +15,15 @@
 
 +(DBManager*)getSharedInstance;
 -(BOOL)createDB;
--(BOOL) saveData:(NSString*)registerNumber name:(NSString*)name
-      department:(NSString*)department year:(NSString*)year;
--(NSArray*) findByRegisterNumber:(NSString*)registerNumber;
++(void)finalize;
+- (BOOL) saveData:(NSString*)isbn title:(NSString*)title
+           author:(NSString*)author publisher:(NSString*)publisher category:(NSString*)category description:(NSString*)description rating:(NSString*)rating copies:(NSInteger)copies archive:(BOOL)archive;
+- (BOOL) saveData:(NSString*)isbn username:(NSString*)username
+          emailid:(NSString*)emailid issuedate:(NSString*)issuedate duedate:(NSString*)duedate status:(BOOL)status;
+- (BOOL) saveData:(NSString*)isbn
+          emailid:(NSString*)emailid issuedate:(NSString*)issuedate duedate:(NSString*)duedate;
+- (NSInteger)searchISBN:(NSString*)isbn;
+-(NSInteger)searchcopies:(NSString*)isbn;
+-(BOOL)updatecopies:(NSString*)isbn copies:(NSInteger)copies;
+-(NSMutableArray*) finddetailsbyisbn:(NSString*)isbn;
 @end

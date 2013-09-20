@@ -17,9 +17,9 @@
     int flag;
     UIActionSheet *action;
 }
-@property (nonatomic,retain) IBOutlet NSMutableArray *outputarray;
-@property (nonatomic,retain) IBOutlet NSMutableArray *tabledatasource;
+@property (nonatomic,retain) NSMutableArray *outputarray;
+@property (nonatomic,retain) NSMutableArray *tabledatasource;
 @property (nonatomic,strong) IBOutlet UIPickerView *pickerview;
-@property (nonatomic,retain) IBOutlet NSMutableArray *pickersource;
+@property (nonatomic,retain) NSMutableArray *pickersource;
 @property (nonatomic,assign) int flag;
 @end

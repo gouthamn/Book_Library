@@ -9,6 +9,7 @@
 #import "bookdetailsViewController.h"
 #import "tablecell.h"
 #import "lendViewController.h"
+#import "DBManager.h"
 @interface bookdetailsViewController ()
 
 @end
@@ -27,9 +28,11 @@
 - (void)viewDidLoad
 {
     [super viewDidLoad];
+    NSLog(@"book detail");
     self.title=@"Book Details";
     headers=@[@"Author",@"Publisher",@"Genre",@"Description",@"Status"];
-    tabledatasource=[[NSMutableArray alloc] initWithObjects:@"Dave Mark & Jeff Lavarche",@"Apress(July21,2009)",@"computers",@"Features the best practices in the art and science of constructing software--topics include design, applying good techniques to construction, eliminating errors, planning, managing construction activities, and relating personal character to superior software. Original. (Intermediate)",@"Available", nil];
+   // tabledatasource=[[NSMutableArray alloc] initWithObjects:@"Dave Mark & Jeff Lavarche",@"Apress(July21,2009)",@"computers",@"Features the best practices in the art and science of constructing software--topics include design, applying good techniques to construction, eliminating errors, planning, managing construction activities, and relating personal character to superior software. Original. (Intermediate)",@"Available", nil];
+    
     pickersource=[[NSMutableArray alloc] initWithObjects:@"abc",@"kjnjk",@"uiweui",@"jknjk", nil];
     
     UIBarButtonItem *bar=[[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemAdd target:self action:@selector(addcopies)];
@@ -41,17 +44,32 @@
 }
 -(void)addcopies
 {
-    UIAlertView *alertview=[[UIAlertView alloc] initWithTitle:@"Enter Number of copies to add" message:@"Number of copies available:1" delegate:self cancelButtonTitle:@"cancel" otherButtonTitles:@"Add", nil ];
+    NSInteger i=[[DBManager getSharedInstance] searchcopies:[tabledatasource objectAtIndex:0]];
+    NSString *msg=[NSString stringWithFormat:@"Number of copies available:%d",i];
+    UIAlertView *alertview=[[UIAlertView alloc] initWithTitle:@"Enter Number of copies to add" message:msg delegate:self cancelButtonTitle:@"cancel" otherButtonTitles:@"Add", nil ];
     alertview.alertViewStyle=UIAlertViewStylePlainTextInput;
     
     [alertview show];
 }
 -(void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex
 {
-    int i=[[[alertView textFieldAtIndex:0] text] intValue];
-    NSLog(@"%d",i);
+    if (buttonIndex==1) {
+        
+   
+    NSInteger i=[[[alertView textFieldAtIndex:0] text] integerValue];
+    
+    if (i>0) {
+        [[DBManager getSharedInstance]updatecopies:[tabledatasource objectAtIndex:0] copies:i];
+    }
+    else
+    {
+        UIAlertView *alertview=[[UIAlertView alloc] initWithTitle:@"Alert!!" message:@"Invalid Number" delegate:self cancelButtonTitle:@"OK" otherButtonTitles: nil ];
+        [alertview show];
+    }
+    }
     
 }
+
 - (void)didReceiveMemoryWarning
 {
     [super didReceiveMemoryWarning];
@@ -92,12 +110,14 @@
                  initWithStyle:UITableViewCellStyleDefault
                  reuseIdentifier:@"Cell2"];
     }
-    
+ NSUserDefaults *defaults=[NSUserDefaults standardUserDefaults];
+   
     switch (indexPath.row) {
         case 0:
-            cell.imgview.image=[UIImage imageNamed:@"books.jpeg"];
-            cell.nameLabel.text=@"Beginning iPhone Development";
-            cell.idLabel.text=@"Exploring the iPhone SDK";
+            
+            cell.imgview.image=[UIImage imageWithData:[defaults objectForKey:[tabledatasource objectAtIndex:0]]];
+            cell.nameLabel.text=[tabledatasource objectAtIndex:1];
+            cell.idLabel.text=[tabledatasource objectAtIndex:2];
            
             CGSize expsize = [cell.nameLabel.text sizeWithFont:cell.nameLabel.font constrainedToSize:CGSizeMake(165.0, INFINITY) lineBreakMode:cell.nameLabel.lineBreakMode];
             CGSize expsize2 = [cell.idLabel.text sizeWithFont:cell.idLabel.font constrainedToSize:CGSizeMake(165.0, INFINITY) lineBreakMode:cell.idLabel.lineBreakMode];
@@ -105,10 +125,21 @@
             customnumberofstars = [[DLStarRatingControl alloc] initWithFrame:CGRectMake(88,expsize.height + expsize2.height +20, 140, 41) andStars:5 isFractional:YES];
             customnumberofstars.delegate=self;
             customnumberofstars.backgroundColor=[UIColor clearColor];
-            customnumberofstars.rating=4.0;
+            customnumberofstars.rating=[[tabledatasource objectAtIndex:6] intValue];
             customnumberofstars.enabled=false;
             [cell.contentView addSubview:customnumberofstars];
             return cell;
+            break;
+        case 5:
+            if ([[tabledatasource objectAtIndex:7] intValue]>0) {
+                cell1.detailTextLabel.text=@"Available";
+            }
+            else
+            {
+                cell1.detailTextLabel.text=@"Finished";
+            }
+            cell1.textLabel.text=[headers objectAtIndex:indexPath.row-1];
+            return cell1;
             break;
          case 6:
             NSLog(@"%d",flag);
@@ -139,7 +170,7 @@
             return cell2;
             break;
         default:
-            cell1.detailTextLabel.text=[tabledatasource objectAtIndex:indexPath.row-1];
+            cell1.detailTextLabel.text=[tabledatasource objectAtIndex:indexPath.row+1];
             cell1.textLabel.text=[headers objectAtIndex:indexPath.row-1];
             return cell1;
             break;
@@ -156,9 +187,13 @@
     {
         return 54;
     }
+    else if (indexPath.row==5)
+    {
+        return 54;
+    }
     else
     {
-        NSString *str=[tabledatasource objectAtIndex:indexPath.row-1];
+        NSString *str=[tabledatasource objectAtIndex:indexPath.row+1];
         UIFont *font=[UIFont systemFontOfSize:14];
         CGSize expsize = [str sizeWithFont:font constrainedToSize:CGSizeMake(274.0, INFINITY) lineBreakMode:UILineBreakModeWordWrap];
         

@@ -7,13 +7,13 @@
 //
 
 #import "lendViewController.h"
-
+#import "DBManager.h"
 @interface lendViewController ()
 
 @end
 
 @implementation lendViewController
-@synthesize datepicker,emailid,date,name,popoverController,pagetitle;
+@synthesize datepicker,emailid,date,name,popoverController,pagetitle,isbn,datasource;
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
     self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
@@ -43,7 +43,12 @@
 }
 -(IBAction)submit:(id)sender
 {
-    
+    NSDate *currentdate=[NSDate date];
+    NSDateFormatter *dateFormat = [[NSDateFormatter alloc] init];
+    [dateFormat setDateFormat:@"dd-MM-yyyy"];
+    NSString *str1=[dateFormat stringFromDate:currentdate];
+
+    [[DBManager getSharedInstance] saveData:isbn username:name.text emailid:emailid.text issuedate:str1 duedate:date.text status:1];
 }
 -(IBAction)textFieldBeginEditing:(UITextField *)textField
 {

@@ -15,15 +15,21 @@
 
 +(DBManager*)getSharedInstance;
 -(BOOL)createDB;
-+(void)finalize;
 - (BOOL) saveData:(NSString*)isbn title:(NSString*)title
            author:(NSString*)author publisher:(NSString*)publisher category:(NSString*)category description:(NSString*)description rating:(NSString*)rating copies:(NSInteger)copies archive:(BOOL)archive;
 - (BOOL) saveData:(NSString*)isbn username:(NSString*)username
           emailid:(NSString*)emailid issuedate:(NSString*)issuedate duedate:(NSString*)duedate status:(BOOL)status;
 - (BOOL) saveData:(NSString*)isbn
-          emailid:(NSString*)emailid issuedate:(NSString*)issuedate duedate:(NSString*)duedate;
-- (NSInteger)searchISBN:(NSString*)isbn;
--(NSInteger)searchcopies:(NSString*)isbn;
--(BOOL)updatecopies:(NSString*)isbn copies:(NSInteger)copies;
--(NSMutableArray*) finddetailsbyisbn:(NSString*)isbn;
+          emailid:(NSString*)emailid issuedate:(NSString*)issuedate returndate:(NSString*)returndate;
+-(NSInteger)searchISBN:(NSString*)isbn;
+-(NSInteger)searchCopies:(NSString*)isbn;
+-(BOOL)updateCopies:(NSString*)isbn copies:(NSInteger)copies;
+-(NSMutableArray*) findDetailsByISBN:(NSString*)isbn;
+-(NSString*) getBookNameByISBN:(NSString*)isbn;
+-(NSMutableArray*) searchEmailidsByISBN:(NSString*)isbn;
+-(NSString*)deleteTransaction:(NSString*)isbn email:(NSString*)email;
+-(NSMutableArray*)getTransactionsByStatus:(BOOL)status;
+-(NSMutableArray*)completedTransactions;
+-(NSMutableArray*) findDetailForCategory:(NSString*)category;
+
 @end

@@ -10,12 +10,13 @@
 #import "SWRevealViewController.h"
 #import "bookdetailsViewController.h"
 #import "lendViewController.h"
-@interface scanViewController ()
+
+@interface ScanViewController ()
 
 @end
 
-@implementation scanViewController
-@synthesize resultText,resultImage,camerabutton;
+@implementation ScanViewController
+@synthesize resultText,resultImage,camerabutton,bookexists;
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
     self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
@@ -51,20 +52,7 @@
     reader.supportedOrientationsMask = ZBarOrientationMaskAll;
     
     ZBarImageScanner *scanner = reader.scanner;
-    // TODO: (optional) additional reader configuration here
-    
-    // EXAMPLE: disable rarely used I2/5 to improve performance
-    /* [scanner setSymbology: ZBAR_I25
-     config: ZBAR_CFG_ENABLE
-     to: 0];*/
-    
-    /*  if([ZBarReaderController isSourceTypeAvailable:
-     UIImagePickerControllerSourceTypeCamera])
-     reader.sourceType = UIImagePickerControllerSourceTypeCamera;
-     [reader.scanner setSymbology: ZBAR_I25
-     config: ZBAR_CFG_ENABLE
-     to: 0]; */
-    
+
     [scanner setSymbology: ZBAR_QRCODE
                    config: ZBAR_CFG_ENABLE
                        to: 0];
@@ -76,12 +64,8 @@
     [resultText resignFirstResponder];
     return YES;
 }
-- (IBAction) scanButtonTapped
-{
-    // ADD: present a barcode reader that scans from the camera feed
-       
-}
-- (UIImage *)GetRawImage:(NSString *)imageUrlPath
+
+- (UIImage *)getRawImage:(NSString *)imageUrlPath
 {
     NSURL *imageURL = [NSURL URLWithString:imageUrlPath];
     NSData *data = [NSData dataWithContentsOfURL:imageURL];
@@ -90,13 +74,27 @@
 }
 -(IBAction)submit:(id)sender
 {
-    if (resultText.text.length==10 || resultText.text.length==13 || resultText.text.length==6) {
+    bookexists=[[DBManager getSharedInstance] searchISBN:resultText.text];
+     
+    if (resultText.text.length==10 || resultText.text.length==13) {
+        if(bookexists==1)
+        {
         UIActionSheet *action=[[UIActionSheet alloc] initWithTitle:@"Choose an Option"
                                                           delegate:self
                                                  cancelButtonTitle:@"cancel"
                                             destructiveButtonTitle:nil
-                                                 otherButtonTitles:@"Register new book ",@"Lend Book",@"Borrow Book",@"Take back your book",nil];
+                                                 otherButtonTitles:@"Lend Book",@"Take back your book",@"Register New copy",nil];
         [action showInView:self.view];
+        }
+        else
+        {
+            UIActionSheet *action=[[UIActionSheet alloc] initWithTitle:@"Choose an Option"
+                                                              delegate:self
+                                                     cancelButtonTitle:@"cancel"
+                                                destructiveButtonTitle:nil
+                                                     otherButtonTitles:@"Lend Book",@"Borrow Book",nil];
+            [action showInView:self.view];
+        }
     }
     else
     {
@@ -109,97 +107,96 @@
 }
 -(void)actionSheet:(UIActionSheet *)actionSheet clickedButtonAtIndex:(NSInteger)buttonIndex
 {
+     UIStoryboard *storyboard=[UIStoryboard storyboardWithName:@"MainStoryboard" bundle:nil];
+     
     
-     NSInteger i=[[DBManager getSharedInstance] searchISBN:resultText.text];
-    
-    //[DBManager finalize];
-   // int i=0;
-    if (buttonIndex==4) {
-        
-    }
-    else
+    // if i=1 book already exists
+    if(bookexists ==1)
     {
-        if(buttonIndex==0)
-        {
-           
-            if(i==0)
+        switch (buttonIndex) {
+            case 0:
             {
-            NSString *str=[NSString stringWithFormat:@"https://www.googleapis.com/books/v1/volumes?q=isbn:%@",resultText.text];
-                //0735619670
-            NSURL* jsonURL = [NSURL URLWithString:str];
-            dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-                NSData* data = [NSData dataWithContentsOfURL:
-                                jsonURL];
-                [self performSelectorOnMainThread:@selector(fetchedData:)
-                                       withObject:data waitUntilDone:YES];
-            
-            });
-            
-            }
-            else
-            {
-                UIAlertView *alertview=[[UIAlertView alloc] initWithTitle:@"Info!!" message:@"Book already exists" delegate:self cancelButtonTitle:@"OK" otherButtonTitles:nil ];
-                [alertview show];
-            }
-        }
-        else if (buttonIndex==1)
-        {
-            if(i==1)
-            {
-                NSInteger copies=[[DBManager getSharedInstance] searchcopies:resultText.text];
+                NSInteger copies=[[DBManager getSharedInstance] searchCopies:resultText.text];
                 if (copies>0) {
                     
-            UIStoryboard *storyboard=[UIStoryboard storyboardWithName:@"MainStoryboard" bundle:nil];
-            lendViewController *lend=[storyboard instantiateViewControllerWithIdentifier:@"lend"];
-                lend.pagetitle=@"Lend Book";
-                lend.isbn=resultText.text;
-            [self.navigationController pushViewController:lend animated:YES];
+                    
+                    lendViewController *lend=[storyboard instantiateViewControllerWithIdentifier:@"lend"];
+                    lend.pagetitle=@"Lend Book";
+                    lend.flag=1;
+                    lend.isbn=resultText.text;
+                    [self.navigationController pushViewController:lend animated:YES];
                 }
                 else
                 {
                     UIAlertView *alertview=[[UIAlertView alloc] initWithTitle:@"Info!!" message:@"Number of copies available:0" delegate:self cancelButtonTitle:@"OK" otherButtonTitles:nil ];
                     [alertview show];
-
+                    
                 }
             }
-            else
+                break;
+            case 1:
             {
-                UIAlertView *alertview=[[UIAlertView alloc] initWithTitle:@"Info!!" message:@"This Book doesn't exist.Please register the book." delegate:self cancelButtonTitle:@"OK" otherButtonTitles:nil ];
-                [alertview show];
-            }
-        }
-        else if (buttonIndex == 2)
-        {
-            UIStoryboard *storyboard=[UIStoryboard storyboardWithName:@"MainStoryboard" bundle:nil];
-            lendViewController *lend=[storyboard instantiateViewControllerWithIdentifier:@"lend"];
-            lend.pagetitle=@"Borrow Book";
-            lend.isbn=resultText.text;
-          [self.navigationController pushViewController:lend animated:YES];
-        }
-        else
-        {
-               NSMutableArray *arr= [[DBManager getSharedInstance]finddetailsbyisbn:resultText.text];
-            if (arr!=nil) {
-                    UIStoryboard *storyboard=[UIStoryboard storyboardWithName:@"MainStoryboard" bundle:nil];
+                NSMutableArray *arr= [[DBManager getSharedInstance]findDetailsByISBN:resultText.text];
+                
+                    
                     bookdetailsViewController *bookdetails=[storyboard instantiateViewControllerWithIdentifier:@"bookdetails"];
                     bookdetails.tabledatasource=arr;
-                    bookdetails.flag=4;
+                    bookdetails.flag=2;
                     [self.navigationController pushViewController:bookdetails animated:YES];
-               }
-            else
-            {
-                UIAlertView *alert=[[UIAlertView alloc] initWithTitle:@"Info!!" message:@"Book Not registered" delegate:self cancelButtonTitle:@"OK" otherButtonTitles:nil];
-                [alert show];
             }
-        }
+                break;
+            case 2:
+            {
+                NSMutableArray *arr= [[DBManager getSharedInstance]findDetailsByISBN:resultText.text];
+                [[DBManager getSharedInstance]updateCopies:resultText.text copies:1];
+                    bookdetailsViewController *bookdetails=[storyboard instantiateViewControllerWithIdentifier:@"bookdetails"];
+                    bookdetails.tabledatasource=arr;
+                    bookdetails.flag=1;
+                    [self.navigationController pushViewController:bookdetails animated:YES];
+            }
+                break;
+            default:
+                break;
+            }
         
-
     }
+    else
+    {
+        switch (buttonIndex) {
+            case 0:
+            {
+                NSString *str=[NSString stringWithFormat:@"https://www.googleapis.com/books/v1/volumes?q=isbn:%@",resultText.text];
+                //0735619670
+                NSURL* jsonURL = [NSURL URLWithString:str];
+                dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+                    NSData* data = [NSData dataWithContentsOfURL:
+                                    jsonURL];
+                    [self performSelectorOnMainThread:@selector(fetchedData:)
+                                           withObject:data waitUntilDone:YES];
+                    
+                });
+                
+            }
+                break;
+            case 1:
+            {
+                lendViewController *lend=[storyboard instantiateViewControllerWithIdentifier:@"lend"];
+                lend.pagetitle=@"Borrow Book";
+                lend.isbn=resultText.text;
+                lend.flag=0;
+                [self.navigationController pushViewController:lend animated:YES];
+            }
+                break;
+            default:
+                break;
+        }
+    }
+
 }
 - (void)fetchedData:(NSData *)responseData{
     //parse out the json data
     
-    
+    NSLog(@"hello");
     NSError* error;
     NSDictionary* json = [NSJSONSerialization
                           JSONObjectWithData:responseData //1
@@ -209,38 +206,62 @@
     if (json != nil &&
         error == nil)
     {
+       if( [[json objectForKey:@"totalItems"] isEqualToNumber:[NSNumber numberWithInt:1]])
+       {
         //extracting data from json object
         NSLog(@"Successfully deserialized...");
        
         NSDictionary* items = [json objectForKey:@"items"];
         for(NSDictionary *dict in items)
         {
-            title= [[  dict objectForKey:@"volumeInfo"] objectForKey:@"title"] ;
+            
+            title      = [[  dict objectForKey:@"volumeInfo"] objectForKey:@"title"] ;
             publisher  = [[  dict objectForKey:@"volumeInfo"] objectForKey:@"publisher"] ;
             author     = [[[ dict objectForKey:@"volumeInfo"] objectForKey:@"authors"]objectAtIndex:0];
             category   = [[[ dict objectForKey:@"volumeInfo"] objectForKey:@"categories"]objectAtIndex:0];
             description= [[  dict objectForKey:@"volumeInfo"] objectForKey:@"description"];
+            description=[description stringByReplacingOccurrencesOfString:@"\"" withString:@"'"];
             rating     = [[  dict objectForKey:@"volumeInfo"] objectForKey:@"averageRating"];
             imgURL     = [[[ dict objectForKey:@"volumeInfo"] objectForKey:@"imageLinks"] objectForKey:@"thumbnail"];
         }
         
+        if(title.length==0)
+        {
+            title=@"";
+        }
+        if(publisher.length==0)
+        {
+            publisher=@"";
+        }
+           
+        if(category.length==0)
+        {
+            
+            category=@"";
+        }
+        if(author.length==0)
+        {
+            author=@"";
+        }
+        if(description.length==0)
+        {
+            description=@"";
+        }
+        if(rating.length==0)
+        {
+            rating=@"";
+        }
+        if(imgURL.length==0)
+        {
+            imgURL=@"";
+        }
+        else
+        {
         imgdata=[NSData dataWithContentsOfURL:[NSURL URLWithString:imgURL]];
-        //UIImage *img=[[UIImage alloc] initWithData:imgdata];
-        
-        
-      
-      /*  NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory,NSUserDomainMask, YES);
-        NSString *documentsDirectory = [paths objectAtIndex:0];
-        
-        //  Append the filename and get the full image path
-        NSString *savedImagePath = [documentsDirectory stringByAppendingPathComponent:[NSString stringWithFormat:@"%@.png",resultText.text]];
-        
-        //  Now convert the image to PNG/JPEG and write it to the image path
-        NSData *imageData = UIImagePNGRepresentation(img);
-        [imageData writeToFile:savedImagePath atomically:NO];*/
         
         NSUserDefaults *defaults=[NSUserDefaults standardUserDefaults];
         [defaults setObject:imgdata forKey:resultText.text];
+        }
         
         [[DBManager getSharedInstance] saveData:resultText.text title:title author:author publisher:publisher category:category description:description rating:rating copies:1 archive:0];
        
@@ -249,12 +270,14 @@
         bookdetails.flag=1;
         bookdetails.tabledatasource=[[NSMutableArray alloc] initWithObjects:resultText.text,title,author,publisher,category,description,rating,[NSNumber numberWithInt:1],nil];
         [self.navigationController pushViewController:bookdetails animated:YES];
+           return;
+       }
+        
     }
-    else
-    {
+    
         UIAlertView *alert=[[UIAlertView alloc] initWithTitle:@"Alert!!" message:@"Invalid ISBN Number" delegate:self cancelButtonTitle:@"OK" otherButtonTitles:nil];
         [alert show];
-    }
+    
     
 }
 - (void) imagePickerController: (UIImagePickerController*) reader

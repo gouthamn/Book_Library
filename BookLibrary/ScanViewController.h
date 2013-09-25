@@ -9,7 +9,8 @@
 #import <UIKit/UIKit.h>
 #import "ZBarSDK.h"
 #import "DBManager.h"
-@interface scanViewController : UIViewController<ZBarReaderDelegate,UIActionSheetDelegate,UITextFieldDelegate>
+
+@interface ScanViewController : UIViewController<ZBarReaderDelegate,UIActionSheetDelegate,UITextFieldDelegate>
 {
     UIImageView *resultImage;
     UITextField *resultText;
@@ -26,7 +27,7 @@
 @property (nonatomic, retain) IBOutlet UITextField *resultText;
 @property (weak, nonatomic) IBOutlet UIBarButtonItem *sidebarButton;
 @property (weak, nonatomic) IBOutlet UIBarButtonItem *camerabutton;
-- (IBAction) scanButtonTapped;
+@property (nonatomic,assign) NSInteger bookexists;
 
 
 @end

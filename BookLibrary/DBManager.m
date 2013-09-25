@@ -32,7 +32,7 @@ static sqlite3_stmt *statement = nil;
     // Build the path to the database file
     databasePath = [[NSString alloc] initWithString:
                     [docsDir stringByAppendingPathComponent: @"booklibrary.db"]];
-   // /Users/goutham/Library/Application Support/iPhone Simulator/6.1/Applications/B62CF871-0C8B-4DC2-802F-FEB41126BABA/Documents/booklibrary.db
+   
     NSLog(@"%@",databasePath);
     BOOL isSuccess = YES;
     NSFileManager *filemgr = [NSFileManager defaultManager];
@@ -86,41 +86,11 @@ static sqlite3_stmt *statement = nil;
     }
     return isSuccess;
 }
-- (UIImage *)GetRawImage:(NSString *)imageUrlPath
-{
-    NSURL *imageURL = [NSURL URLWithString:imageUrlPath];
-    NSData *data = [NSData dataWithContentsOfURL:imageURL];
-    UIImage *image = [[UIImage alloc] initWithData:data];
-    return image;
-}
+
 - (BOOL) saveData:(NSString*)isbn title:(NSString*)title
            author:(NSString*)author publisher:(NSString*)publisher category:(NSString*)category description:(NSString*)description rating:(NSString*)rating copies:(NSInteger)copies archive:(BOOL)archive;
 {
-   /* const char *dbpath = [databasePath UTF8String];
-   UIImage *myImage =  [self GetRawImage:imgurl]; //Get image from method below
-    if(myImage != nil)
-    {
-        NSData *imgData = UIImagePNGRepresentation(myImage);
-    if (sqlite3_open(dbpath, &database) == SQLITE_OK)
-    {
-    NSString *insertSQL = [NSString stringWithFormat:@"insert into BookDetail values(\"%@\",\"%@\", \"%@\", \"%@\",\"%@\",\"%@\",\"%@\",\"%@\",\"%@\",\"%d\")",isbn,title,author,publisher,category,description,rating,imgData,copies,archive];
-                               const char *insert_stmt = [insertSQL UTF8String];
-                                sqlite3_prepare_v2(database, insert_stmt,-1, &statement, NULL);
-                                if (sqlite3_step(statement) == SQLITE_DONE)
-                                {
-                                    return YES;
-                                }
-                                else {
-                                    NSLog(@"%s",sqlite3_errmsg(database));
-                                    return NO;
-                                }
-                                sqlite3_reset(statement);
-                                }
-    }
-    NSLog(@"%s",sqlite3_errmsg(database));
-                                return NO;
-    */
-    
+       
     BOOL isInserted=YES;
     sqlite3_stmt *statement;
    
@@ -133,19 +103,21 @@ static sqlite3_stmt *statement = nil;
            
            
             const char *insert_stmt = [insertSQL UTF8String];
+            NSLog(@"%s",insert_stmt);
             if(sqlite3_prepare_v2(database, insert_stmt, -1, &statement, NULL) == SQLITE_OK)
             {
+               
+                 if (sqlite3_step(statement) == SQLITE_DONE)
+                 {
+                   NSLog(@"string added");
+                 }
+                 else
+                 {
+                   NSLog(@"%s",sqlite3_errmsg(database));
+                   isInserted=NO;
+                 }
+            }
            
-            if (sqlite3_step(statement) == SQLITE_DONE)
-            {
-                NSLog(@"string added");
-                
-            } else
-            {
-                NSLog(@"%s",sqlite3_errmsg(database));
-                isInserted=NO;
-            }
-            }
             sqlite3_finalize(statement);
             sqlite3_close(database);
         }
@@ -176,13 +148,13 @@ static sqlite3_stmt *statement = nil;
     return isinserted;
 }
 - (BOOL) saveData:(NSString*)isbn
-          emailid:(NSString*)emailid issuedate:(NSString*)issuedate duedate:(NSString*)duedate
+          emailid:(NSString*)emailid issuedate:(NSString*)issuedate returndate:(NSString*)returndate;
 {
     bool isinserted=NO;
     const char *dbpath = [databasePath UTF8String];
     if (sqlite3_open(dbpath, &database) == SQLITE_OK)
     {
-        NSString *insertSQL = [NSString stringWithFormat:@"insert into completed values(\"%@\",\"%@\", \"%@\", \"%@\")",isbn,emailid,issuedate,duedate];
+        NSString *insertSQL = [NSString stringWithFormat:@"insert into completed values(\"%@\",\"%@\", \"%@\", \"%@\")",isbn,emailid,issuedate,returndate];
         const char *insert_stmt = [insertSQL UTF8String];
         sqlite3_prepare_v2(database, insert_stmt,-1, &statement, NULL);
         if (sqlite3_step(statement) == SQLITE_DONE)
@@ -221,7 +193,34 @@ static sqlite3_stmt *statement = nil;
     sqlite3_close(database);
     return count;
 }
--(NSMutableArray*) finddetailsbyisbn:(NSString*)isbn
+-(NSMutableArray*) searchEmailidsByISBN:(NSString*)isbn
+{
+    NSMutableArray *arr=[[NSMutableArray alloc] init];
+    const char *dbpath = [databasePath UTF8String];
+    if (sqlite3_open(dbpath, &database) == SQLITE_OK)
+    {
+        NSString *querySQL = [NSString stringWithFormat:
+                              @"select emailid from transactions where isbn=\"%@\" and status=1",isbn];
+        
+        const char *query_stmt = [querySQL UTF8String];
+        if (sqlite3_prepare_v2(database,
+                               query_stmt, -1, &statement, NULL) == SQLITE_OK)
+        {
+            while (sqlite3_step(statement) == SQLITE_ROW)
+            {
+                NSString *emailid = [[NSString alloc] initWithUTF8String:(const char *) sqlite3_column_text(statement, 0)];
+                [arr addObject:emailid];
+                
+            }
+           
+            sqlite3_reset(statement);
+        }
+        sqlite3_close(database);
+    }
+    
+    return arr;
+}
+-(NSMutableArray*) findDetailsByISBN:(NSString*)isbn
 {
     NSMutableArray *arr;
     const char *dbpath = [databasePath UTF8String];
@@ -245,7 +244,7 @@ static sqlite3_stmt *statement = nil;
                 NSString *title=[[NSString alloc] initWithUTF8String:(const char *) sqlite3_column_text(statement, 1)];
                 int copies=sqlite3_column_int(statement, 8);
             
-            arr=[[NSMutableArray alloc] initWithObjects:isbn,title,author,publisher,category,description,rating,copies,nil];
+            arr=[[NSMutableArray alloc] initWithObjects:isbn,title,author,publisher,category,description,rating,[NSNumber numberWithInt:copies],nil];
                
             }
             sqlite3_reset(statement);
@@ -255,7 +254,7 @@ static sqlite3_stmt *statement = nil;
     return arr;
     
 }
--(NSInteger)searchcopies:(NSString*)isbn
+-(NSInteger)searchCopies:(NSString*)isbn
 {
     NSInteger count=0;
     const char *dbpath = [databasePath UTF8String];
@@ -281,9 +280,9 @@ static sqlite3_stmt *statement = nil;
     return count;
 
 }
--(BOOL)updatecopies:(NSString*)isbn copies:(NSInteger)copies
+-(BOOL)updateCopies:(NSString*)isbn copies:(NSInteger)copies
 {
-    NSInteger count=[self searchcopies:isbn];
+    NSInteger count=[self searchCopies:isbn];
     NSInteger sum=count + copies;
     BOOL success=NO;
     const char *dbpath = [databasePath UTF8String];
@@ -315,39 +314,212 @@ static sqlite3_stmt *statement = nil;
     return success;
     
 }
-
-- (NSArray*) findByRegisterNumber:(NSString*)registerNumber
+-(NSString*)deleteTransaction:(NSString*)isbn email:(NSString*)email
 {
-            const char *dbpath = [databasePath UTF8String];
-            if (sqlite3_open(dbpath, &database) == SQLITE_OK)
+    NSString *issuedate=[[NSString alloc] init];
+    const char *dbpath = [databasePath UTF8String];
+    if (sqlite3_open(dbpath, &database) == SQLITE_OK)
+    {
+        NSString *querySQL=[NSString stringWithFormat:@"select issuedate from transactions where isbn=\"%@\" and emailid=\"%@\" and status=1",isbn,email];
+        NSString *updateSQL = [NSString stringWithFormat:
+                               @"delete from transactions where isbn=\"%@\" and emailid=\"%@\" and status=1",isbn,email];
+        const char *query_stmt = [querySQL UTF8String];
+        NSLog(@"%s",query_stmt);
+        if(sqlite3_prepare_v2(database,
+                           query_stmt, -1, &statement, NULL)==SQLITE_OK)
+        {
+            NSLog(@"hello");
+            if(sqlite3_step(statement) == SQLITE_ROW)
             {
-                NSString *querySQL = [NSString stringWithFormat:
-                                      @"select name, department, year from studentsDetail where regno=\"%@\"",registerNumber];
-                const char *query_stmt = [querySQL UTF8String];
-                NSMutableArray *resultArray = [[NSMutableArray alloc]init];
-                if (sqlite3_prepare_v2(database,
-                                       query_stmt, -1, &statement, NULL) == SQLITE_OK)
-                {
-                    if (sqlite3_step(statement) == SQLITE_ROW)
-                    {
-                        NSString *name = [[NSString alloc] initWithUTF8String:
-                                          (const char *) sqlite3_column_text(statement, 0)];
-                        [resultArray addObject:name];
-                        NSString *department = [[NSString alloc] initWithUTF8String:
-                                                (const char *) sqlite3_column_text(statement, 1)];
-                        [resultArray addObject:department];
-                        NSString *year = [[NSString alloc]initWithUTF8String:
-                                          (const char *) sqlite3_column_text(statement, 2)];
-                        [resultArray addObject:year];
-                        return resultArray;
-                    }
-                    else{
-                        NSLog(@"Not found");
-                        return nil;
-                    }
-                    sqlite3_reset(statement);
-                }
+                issuedate= [[NSString alloc] initWithUTF8String:(const char *) sqlite3_column_text(statement, 0)];
+                NSLog(@"%@",issuedate);
+                 sqlite3_reset(statement);
+               const char *delete_stmt = [updateSQL UTF8String];
+                sqlite3_prepare_v2(database,
+                                   delete_stmt, -1, &statement, NULL);
+                sqlite3_step(statement);
             }
-            return nil;
+            else
+            {
+                NSLog(@"%s",sqlite3_errmsg(database));
+            }
+            sqlite3_reset(statement);
         }
+       sqlite3_close(database);
+    }
+    
+
+    return issuedate;
+}
+-(NSMutableArray*)getTransactionsByStatus:(BOOL)status
+{
+    NSMutableArray *arr=[[NSMutableArray alloc] init];
+    NSMutableDictionary *dict;
+    const char *dbpath = [databasePath UTF8String];
+    if (sqlite3_open(dbpath, &database) == SQLITE_OK)
+    {
+        NSString *querySQL = [NSString stringWithFormat:
+                              @"select * from transactions where status=\"%d\"",status];
+        
+        const char *query_stmt = [querySQL UTF8String];
+        if (sqlite3_prepare_v2(database,
+                               query_stmt, -1, &statement, NULL) == SQLITE_OK)
+        {
+            while (sqlite3_step(statement) == SQLITE_ROW)
+            {
+                dict=[[NSMutableDictionary alloc] init];
+                NSString *isbn = [[NSString alloc] initWithUTF8String:(const char *) sqlite3_column_text(statement, 0)];
+                [dict setObject:isbn forKey:@"isbn"];
+                NSString *emailid=[[NSString alloc] initWithUTF8String:(const char *) sqlite3_column_text(statement, 2)];
+                 [dict setObject:emailid forKey:@"emailid"];
+                NSString *issuedate=[[NSString alloc] initWithUTF8String:(const char *) sqlite3_column_text(statement, 3)];
+                [dict setObject:issuedate forKey:@"issuedate"];
+                NSString *duedate=[[NSString alloc] initWithUTF8String:(const char *) sqlite3_column_text(statement, 4)];
+                [dict setObject:duedate forKey:@"duedate"];
+                
+                [arr addObject:dict];
+                
+            }
+            sqlite3_reset(statement);
+        }
+        sqlite3_close(database);
+    }
+    return arr;
+
+}
+
+-(NSMutableArray*)completedTransactions
+{
+    NSMutableArray *arr=[[NSMutableArray alloc] init];
+    NSMutableDictionary *dict;
+    const char *dbpath = [databasePath UTF8String];
+    if (sqlite3_open(dbpath, &database) == SQLITE_OK)
+    {
+        NSString *querySQL = [NSString stringWithFormat:
+                              @"select * from completed"];
+        
+        const char *query_stmt = [querySQL UTF8String];
+        if (sqlite3_prepare_v2(database,
+                               query_stmt, -1, &statement, NULL) == SQLITE_OK)
+        {
+            while (sqlite3_step(statement) == SQLITE_ROW)
+            {
+                dict=[[NSMutableDictionary alloc] init];
+                NSString *isbn = [[NSString alloc] initWithUTF8String:(const char *) sqlite3_column_text(statement, 0)];
+                [dict setObject:isbn forKey:@"isbn"];
+                NSString *emailid=[[NSString alloc] initWithUTF8String:(const char *) sqlite3_column_text(statement, 1)];
+                [dict setObject:emailid forKey:@"emailid"];
+                NSString *issuedate=[[NSString alloc] initWithUTF8String:(const char *) sqlite3_column_text(statement, 2)];
+                [dict setObject:issuedate forKey:@"issuedate"];
+                NSString *returndate=[[NSString alloc] initWithUTF8String:(const char *) sqlite3_column_text(statement, 3)];
+                [dict setObject:returndate forKey:@"returndate"];
+                
+                [arr addObject:dict];
+                
+            }
+            sqlite3_reset(statement);
+        }
+        sqlite3_close(database);
+    }
+    return arr;
+    
+}
+-(NSString*) getBookNameByISBN:(NSString*)isbn
+{
+    NSString *title;
+    const char *dbpath = [databasePath UTF8String];
+    if (sqlite3_open(dbpath, &database) == SQLITE_OK)
+    {
+        NSString *querySQL = [NSString stringWithFormat:
+                              @"select title from bookDetail where isbn=\"%@\" and archive=0",isbn];
+        
+        const char *query_stmt = [querySQL UTF8String];
+        if (sqlite3_prepare_v2(database,
+                               query_stmt, -1, &statement, NULL) == SQLITE_OK)
+        {
+            if (sqlite3_step(statement) == SQLITE_ROW)
+            {
+            title=[[NSString alloc] initWithUTF8String:(const char *) sqlite3_column_text(statement, 0)];
+                
+            }
+            sqlite3_reset(statement);
+        }
+        sqlite3_close(database);
+    }
+    return title;
+}
+
+-(NSMutableArray*) findDetailForCategory:(NSString*)category
+{
+    NSMutableArray *arrForFetchingBookInfo=[[NSMutableArray alloc] init];
+    NSMutableDictionary *bookInfoDict;
+    const char *dbpath = [databasePath UTF8String];
+    if (sqlite3_open(dbpath, &database) == SQLITE_OK)
+    {
+        NSString *querySQL = [NSString stringWithFormat:
+                              @"SELECT *,count(*) FROM BookDetail WHERE CATEGORY=\"%@\"",category];
+       
+        const char *query_stmt = [querySQL UTF8String];
+        if (sqlite3_prepare_v2(database,
+                               query_stmt, -1, &statement, NULL) == SQLITE_OK)
+        {
+            while(sqlite3_step(statement) == SQLITE_ROW)
+            {
+                if(sqlite3_column_int(statement, 9) ==0)
+                {
+                    NSLog(@"empty category");
+                }
+                else
+                {
+                    
+                    bookInfoDict=[[NSMutableDictionary alloc]init];
+                    
+                    NSString *publisher = [NSString stringWithUTF8String:(const char *)sqlite3_column_text(statement, 3)];
+                    [bookInfoDict setValue:publisher forKey:@"publisher"];
+                   
+                    
+                    NSString *author=[NSString stringWithUTF8String:(const char *) sqlite3_column_text(statement, 2)];
+                    [bookInfoDict setValue:author forKey:@"author"];
+                    
+                    
+                    NSString *isbn=[NSString  stringWithUTF8String:(const char *) sqlite3_column_text(statement, 0)];
+                    [bookInfoDict setValue:isbn forKey:@"isbn"];
+                    
+                    
+                    [bookInfoDict setValue:category forKey:@"category"];
+                   
+                    
+                    NSString *description=[NSString stringWithUTF8String:(const char *) sqlite3_column_text(statement, 5)];
+                    [bookInfoDict setValue:description forKey:@"description"];
+                    
+                    
+                    NSString *rating=[NSString stringWithUTF8String:(const char *) sqlite3_column_text(statement, 6)];
+                    [bookInfoDict setValue:rating forKey:@"rating"];
+                    
+                    
+                    NSString *title=[NSString stringWithUTF8String:(const char *) sqlite3_column_text(statement, 1)];
+                    [bookInfoDict setValue:title forKey:@"title"];
+                    
+                    
+                    int copies=sqlite3_column_int(statement, 7);
+                    [bookInfoDict setValue:[NSNumber numberWithInt:copies] forKey:@"copies"];
+                    
+                    
+                    [arrForFetchingBookInfo addObject:bookInfoDict];
+                }
+                
+            }
+            
+            sqlite3_reset(statement);
+        }
+        else
+        {
+            NSLog(@"it is in else =%s",sqlite3_errmsg(database));
+        }
+        sqlite3_close(database);
+    }
+    return arrForFetchingBookInfo;
+}
+
+
 @end

@@ -23,10 +23,9 @@
                                                            [NSValue valueWithUIOffset:UIOffsetMake(0, 0)],
                                                            UITextAttributeTextShadowOffset,
                                                            [UIFont fontWithName:@"Helvetica-Light" size:20.0], UITextAttributeFont, nil]];
-   // [DBManager finalize];
-   // NSInteger i= [[DBManager getSharedInstance] searchISBN:@"0735619670"];
-  //  NSLog(@"%d",i);
-       
+   
+    [[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"HasLaunchedOnce"];
+    [[NSUserDefaults standardUserDefaults] synchronize];
     
     return YES;
 }

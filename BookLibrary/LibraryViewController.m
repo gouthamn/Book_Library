@@ -9,6 +9,7 @@
 #import "libraryViewController.h"
 #import "SWRevealViewController.h"
 #import "booklistViewController.h"
+#import "DBManager.h"
 @interface libraryViewController ()
 
 @end
@@ -27,6 +28,10 @@
 - (void)viewDidLoad
 {
     [super viewDidLoad];
+    if ([[NSUserDefaults standardUserDefaults] boolForKey:@"HasLaunchedOnce"]) {
+       [[NSUserDefaults standardUserDefaults] setBool:NO forKey:@"HasLaunchedOnce"];
+          [self.revealViewController performSelector:@selector(revealToggle:) withObject:self];
+    }
     
     self.title = @"My Library";
     _sidebarButton.tintColor = [UIColor colorWithWhite:0.96f alpha:0.2f];
@@ -37,9 +42,11 @@
     
     // Set the gesture
     [self.view addGestureRecognizer:self.revealViewController.panGestureRecognizer];
-    self.tabledatasource=@[@"Action",@"Adventure",@"Fiction",@"Psychology",@"Spiritual"];
+    self.tabledatasource=@[@"Action",@"Adventure",@"Fiction",@"Psychology",@"Spiritual",@"Computers",@"Cooking"];
+    
 	// Do any additional setup after loading the view.
 }
+
 
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView
 {
@@ -67,19 +74,13 @@
 }
 -(void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender
 {
-    NSIndexPath *indexPath=[self.tableview indexPathForSelectedRow];
-    booklistViewController *booklist=segue.destinationViewController;
-    //UIStoryboard *storyboard=[UIStoryboard storyboardWithName:@"MainStoryboard_iPad" bundle:nil];
-  //  booklistViewController *booklist=[storyboard instantiateViewControllerWithIdentifier:@"booklist"];
-    //[booklist.navigationController setTitle:[self.tabledatasource objectAtIndex:indexPath.row]];
-    booklist.category=[self.tabledatasource objectAtIndex:indexPath.row];
-    
+        NSIndexPath *indexPath=[self.tableview indexPathForSelectedRow];
+        booklistViewController *booklist=segue.destinationViewController;
+        booklist.category=[self.tabledatasource objectAtIndex:indexPath.row];
+        booklist.tabledatasource=[[DBManager getSharedInstance] findDetailForCategory:booklist.category ];
+        
 }
-- (void)didReceiveMemoryWarning
-{
-    [super didReceiveMemoryWarning];
-    // Dispose of any resources that can be recreated.
-}
+
 -(void)viewWillAppear:(BOOL)animated
 {
     [super viewWillAppear:animated];

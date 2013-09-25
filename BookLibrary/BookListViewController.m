@@ -13,6 +13,7 @@
 @end
 
 @implementation booklistViewController
+
 @synthesize tabledatasource,results,category,tableview;
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
@@ -36,6 +37,7 @@
     [super didReceiveMemoryWarning];
     // Dispose of any resources that can be recreated.
 }
+
 -(BOOL)searchDisplayController:(UISearchDisplayController *)controller
 shouldReloadTableForSearchString:(NSString *)searchString
 {
@@ -56,9 +58,9 @@ shouldReloadTableForSearchScope:(NSInteger)searchOption
                                scope:[[self.searchDisplayController.searchBar scopeButtonTitles]
                                       objectAtIndex:searchOption]];
     
-    
     return YES;
 }
+
 - (void)filterContentForSearchText:(NSString*)searchText scope:(NSString*)scope
 
 {
@@ -92,7 +94,7 @@ shouldReloadTableForSearchScope:(NSInteger)searchOption
     if ([tableView isEqual:self.searchDisplayController.searchResultsTableView]) {
         return [results count];
     }
-    return 1;
+    return [tabledatasource count];
 }
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
@@ -108,22 +110,44 @@ shouldReloadTableForSearchScope:(NSInteger)searchOption
                 initWithStyle:UITableViewCellStyleDefault
                 reuseIdentifier:CellIdentifier];
     }
+     NSUserDefaults *defaults=[NSUserDefaults standardUserDefaults];
     if ([tableView isEqual:self.searchDisplayController.searchResultsTableView]) {
-     
+        
     }
     else
-    {
-        cell.imgview.image=[UIImage imageNamed:@"books.jpeg"];
-        cell.nameLabel.text=@"Beginning iPhone Development";
-        cell.idLabel.text=@"Exploring the iPhone SDK";
-        customnumberofstars = [[DLStarRatingControl alloc] initWithFrame:CGRectMake(70,55,140, 41) andStars:5 isFractional:YES];
-        customnumberofstars.delegate=self;
-        customnumberofstars.backgroundColor=[UIColor clearColor];
-        customnumberofstars.rating=4.0;
-        customnumberofstars.enabled=false;
-        [cell.contentView addSubview:customnumberofstars];
+    {            
+          cell.imgview.image=[UIImage imageWithData:[defaults objectForKey:[[self.tabledatasource objectAtIndex:indexPath.row] objectForKey:@"isbn" ]]];
+          cell.nameLabel.text=[[self.tabledatasource objectAtIndex:indexPath.row] objectForKey:@"title"] ;
+          cell.idLabel.text=  [[self.tabledatasource objectAtIndex:indexPath.row] objectForKey:@"author"];//assigning author name
+          customnumberofstars = [[DLStarRatingControl alloc] initWithFrame:CGRectMake(70,55,140, 41) andStars:5 isFractional:YES];
+          customnumberofstars.delegate=self;
+          customnumberofstars.backgroundColor=[UIColor clearColor];
+          customnumberofstars.rating=[[[self.tabledatasource objectAtIndex:indexPath.row] objectForKey:@"rating" ] doubleValue] ;
+          customnumberofstars.enabled=false;
+          [cell.contentView addSubview:customnumberofstars];
+        
     }
     return cell;
+}
+-(void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender
+{
+    
+    NSIndexPath *indexPath=[self.tableview indexPathForSelectedRow];
+    
+    booklistViewController *bookDetail=segue.destinationViewController;
+    bookDetail.tabledatasource         =[NSMutableArray arrayWithObjects:[[self.tabledatasource objectAtIndex:indexPath.row] objectForKey:@"isbn" ],
+                                       [[self.tabledatasource objectAtIndex:indexPath.row] objectForKey:@"title"],
+                                       [[self.tabledatasource objectAtIndex:indexPath.row] objectForKey:@"author"],
+                                       [[self.tabledatasource objectAtIndex:indexPath.row] objectForKey:@"publisher"],
+                                       [[self.tabledatasource objectAtIndex:indexPath.row] objectForKey:@"category" ],
+                                       [[self.tabledatasource objectAtIndex:indexPath.row] objectForKey:@"description"],
+                                       [[self.tabledatasource objectAtIndex:indexPath.row] objectForKey:@"rating"],
+                                       [[self.tabledatasource objectAtIndex:indexPath.row] objectForKey:@"copies"], nil];
+   
+}
+-(NSString*)tableView:(UITableView *)tableView titleForDeleteConfirmationButtonForRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    return @"Archive";
 }
 
 -(void)tableView:(UITableView *)tableView commitEditingStyle:(UITableViewCellEditingStyle)editingStyle forRowAtIndexPath:(NSIndexPath *)indexPath{
@@ -135,6 +159,7 @@ shouldReloadTableForSearchScope:(NSInteger)searchOption
         [alertview show];
     }
 }
+
 -(void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex
 {
     int i=[[[alertView textFieldAtIndex:0] text] intValue];
@@ -150,6 +175,5 @@ shouldReloadTableForSearchScope:(NSInteger)searchOption
     {
         [self.tableview deselectRowAtIndexPath:index animated:YES];
     }
-    
 }
 @end

@@ -31,20 +31,14 @@
     NSLog(@"book detail");
     self.title=@"Book Details";
     headers=@[@"Author",@"Publisher",@"Genre",@"Description",@"Status"];
-   // tabledatasource=[[NSMutableArray alloc] initWithObjects:@"Dave Mark & Jeff Lavarche",@"Apress(July21,2009)",@"computers",@"Features the best practices in the art and science of constructing software--topics include design, applying good techniques to construction, eliminating errors, planning, managing construction activities, and relating personal character to superior software. Original. (Intermediate)",@"Available", nil];
-    
-    pickersource=[[NSMutableArray alloc] initWithObjects:@"abc",@"kjnjk",@"uiweui",@"jknjk", nil];
-    
-    UIBarButtonItem *bar=[[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemAdd target:self action:@selector(addcopies)];
+   
+    UIBarButtonItem *bar=[[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemAdd target:self action:@selector(addCopies)];
     self.navigationItem.rightBarButtonItems=[NSArray arrayWithObject:bar];
-   // UIBarButtonItem *btn = [[UIBarButtonItem alloc] initWithImage:[UIImage imageNamed:@"back-button.png"] style:UIBarButtonItemStylePlain target:self action:nil];
-    
-   // [self.navigationItem setLeftBarButtonItem:btn];
-	// Do any additional setup after loading the view.
+   
 }
--(void)addcopies
+-(void)addCopies
 {
-    NSInteger i=[[DBManager getSharedInstance] searchcopies:[tabledatasource objectAtIndex:0]];
+    NSInteger i=[[DBManager getSharedInstance] searchCopies:[tabledatasource objectAtIndex:0]];
     NSString *msg=[NSString stringWithFormat:@"Number of copies available:%d",i];
     UIAlertView *alertview=[[UIAlertView alloc] initWithTitle:@"Enter Number of copies to add" message:msg delegate:self cancelButtonTitle:@"cancel" otherButtonTitles:@"Add", nil ];
     alertview.alertViewStyle=UIAlertViewStylePlainTextInput;
@@ -59,7 +53,7 @@
     NSInteger i=[[[alertView textFieldAtIndex:0] text] integerValue];
     
     if (i>0) {
-        [[DBManager getSharedInstance]updatecopies:[tabledatasource objectAtIndex:0] copies:i];
+        [[DBManager getSharedInstance]updateCopies:[tabledatasource objectAtIndex:0] copies:i];
     }
     else
     {
@@ -125,7 +119,7 @@
             customnumberofstars = [[DLStarRatingControl alloc] initWithFrame:CGRectMake(88,expsize.height + expsize2.height +20, 140, 41) andStars:5 isFractional:YES];
             customnumberofstars.delegate=self;
             customnumberofstars.backgroundColor=[UIColor clearColor];
-            customnumberofstars.rating=[[tabledatasource objectAtIndex:6] intValue];
+            customnumberofstars.rating=[[tabledatasource objectAtIndex:6] doubleValue];
             customnumberofstars.enabled=false;
             [cell.contentView addSubview:customnumberofstars];
             return cell;
@@ -142,7 +136,7 @@
             return cell1;
             break;
          case 6:
-            NSLog(@"%d",flag);
+           
             switch (flag) {
                 case 1:
                     cell2.borrow.enabled=false;
@@ -150,16 +144,6 @@
                     cell2.lend.enabled=true;
                     break;
                 case 2:
-                    cell2.borrow.enabled=false;
-                    cell2.ret.enabled=false;
-                    cell2.lend.enabled=true;
-                    break;
-                case 3:
-                    cell2.borrow.enabled=true;
-                    cell2.ret.enabled=false;
-                    cell2.lend.enabled=false;
-                    break;
-                case 4:
                     cell2.borrow.enabled=false;
                     cell2.ret.enabled=true;
                     cell2.lend.enabled=false;
@@ -179,7 +163,8 @@
 }
 -(CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    
+    //UIFont *font=[UIFont systemFontOfSize:14];
+    //CGSize expsize = [str sizeWithFont:font constrainedToSize:CGSizeMake(274.0, INFINITY) lineBreakMode:UILineBreakModeWordWrap];
     if (indexPath.row==0) {
         return 130;
     }
@@ -187,22 +172,19 @@
     {
         return 54;
     }
-    else if (indexPath.row==5)
-    {
-        return 54;
-    }
     else
     {
-        NSString *str=[tabledatasource objectAtIndex:indexPath.row+1];
-        UIFont *font=[UIFont systemFontOfSize:14];
-        CGSize expsize = [str sizeWithFont:font constrainedToSize:CGSizeMake(274.0, INFINITY) lineBreakMode:UILineBreakModeWordWrap];
-        
-        return expsize.height+30;
+        return 43;
     }
     
+    
 }
--(IBAction)takebook:(id)sender
+-(IBAction)takeBook:(id)sender
 {
+    pickersource=[[DBManager getSharedInstance] searchEmailidsByISBN:[tabledatasource objectAtIndex:0]];
+    if (pickersource.count>0) {
+        
+    
    action = [[UIActionSheet alloc] initWithTitle:@"Select Email ID"
                                        delegate:self
                               cancelButtonTitle:nil
@@ -228,7 +210,7 @@
     [barItems addObject:flexSpace];
     UIBarButtonItem *cancelBtn = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemCancel target:self action:@selector(cancel:)];
     [barItems addObject:cancelBtn];
-    UIBarButtonItem *doneBtn = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemDone target:self action:@selector(doneButtonPressed:)];
+    UIBarButtonItem *doneBtn = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemDone target:self action:@selector(doneButtonPressed)];
     [barItems addObject:doneBtn];
     
     
@@ -239,14 +221,36 @@
     
     [action showInView:self.view];
     [action setBounds:CGRectMake(0,0,320,450)];
+    }
+    else
+    {
+        UIAlertView *alertview=[[UIAlertView alloc] initWithTitle:@"Info" message:@"No Email ID's found" delegate:self cancelButtonTitle:@"OK" otherButtonTitles:nil ];
+        
+        [alertview show];
+    }
   /*  CGRect pickerRect = pickerview.bounds;
     pickerRect.origin.y = -40;
     pickerview.bounds = pickerRect;*/
 }
 
--(IBAction)doneButtonPressed:(UIDatePicker*)sender
+-(IBAction)doneButtonPressed
 {
+    NSInteger row=  [self.pickerview selectedRowInComponent:0];
+    NSLog(@"%@",[pickersource objectAtIndex:row]);
+    NSString *issuedate=[[DBManager getSharedInstance] deleteTransaction:[tabledatasource objectAtIndex:0] email:[pickersource objectAtIndex:row]];
+    [[DBManager getSharedInstance] updateCopies:[tabledatasource objectAtIndex:0] copies:1];
+    
+    NSDate *currentdate=[NSDate date];
+    NSDateFormatter *dateFormat = [[NSDateFormatter alloc] init];
+    [dateFormat setDateFormat:@"dd-MM-yyyy"];
+    NSString *str1=[dateFormat stringFromDate:currentdate];
+    [[DBManager getSharedInstance] saveData:[tabledatasource objectAtIndex:0] emailid:[pickersource objectAtIndex:row] issuedate:issuedate returndate:str1];
     [action dismissWithClickedButtonIndex:0 animated:YES];
+    UIAlertView *alertview=[[UIAlertView alloc] initWithTitle:@"Info" message:@"Book Successfully Returned" delegate:self cancelButtonTitle:@"OK" otherButtonTitles:nil ];
+  
+    
+    [alertview show];
+    
     
 }
 -(IBAction)cancel:(id)sender
@@ -279,10 +283,15 @@
     if(button.tag==0)
     {
         lend.pagetitle=@"Lend Book";
+        lend.flag=1;
+        lend.isbn=[tabledatasource objectAtIndex:0];
     }
     else
     {
     lend.pagetitle=@"Borrow Book";
+        lend.isbn=[tabledatasource objectAtIndex:0];
+        lend.flag=0;
+       // lend.datasource=[[DBManager getSharedInstance]finddetailsbyisbn:[tabledatasource objectAtIndex:0]];
     }
 }
 

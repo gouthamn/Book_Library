@@ -14,6 +14,7 @@
     UIActionSheet *menu;
     NSString *pagetitle;
     NSString *isbn;
+    int flag;
 }
 @property (nonatomic, retain) NSMutableArray *datasource;
 @property (nonatomic, retain) IBOutlet UIDatePicker *datepicker;
@@ -22,7 +23,8 @@
 @property (nonatomic, retain) IBOutlet UITextField *date;
 @property (nonatomic, strong) NSString *pagetitle;
 @property (nonatomic, strong) NSString *isbn;
+@property (nonatomic,assign) int flag;
 @property(nonatomic,strong) IBOutlet UIPopoverController *popoverController;
--(IBAction)changedate:(UIButton*)sender;
--(IBAction)textFieldBeginEditing:(UITextField *)textField;
+
+
 @end

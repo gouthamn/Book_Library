@@ -13,7 +13,7 @@
     NSArray *tabledatasource;
 }
 @property (weak, nonatomic) IBOutlet UIBarButtonItem *sidebarButton;
-@property (nonatomic,retain) IBOutlet NSArray *tabledatasource;
+@property (nonatomic,retain) NSArray *tabledatasource;
 @property (nonatomic,retain) IBOutlet UITableView *tableview;
 @end
 

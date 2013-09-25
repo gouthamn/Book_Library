@@ -15,8 +15,8 @@
     NSString *category;
     DLStarRatingControl *customnumberofstars;
 }
-@property (nonatomic,retain) IBOutlet NSMutableArray *tabledatasource;
-@property (nonatomic,retain) IBOutlet NSMutableArray *results;
+@property (nonatomic,retain) NSMutableArray *tabledatasource;
+@property (nonatomic,retain) NSMutableArray *results;
 @property (nonatomic,retain) IBOutlet UITableView *tableview;
 @property (nonatomic,retain) NSString *category;
 @end

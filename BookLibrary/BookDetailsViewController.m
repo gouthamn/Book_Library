@@ -10,12 +10,13 @@
 #import "tablecell.h"
 #import "lendViewController.h"
 #import "DBManager.h"
+#import <QuartzCore/QuartzCore.h>
 @interface bookdetailsViewController ()
 
 @end
 
 @implementation bookdetailsViewController
-@synthesize outputarray,tabledatasource,flag,pickerview,pickersource;
+@synthesize outputarray,tabledatasource,flag,pickerview,pickersource,tableview;
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
     self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
@@ -30,39 +31,30 @@
     [super viewDidLoad];
     NSLog(@"book detail");
     self.title=@"Book Details";
-    headers=@[@"Author",@"Publisher",@"Genre",@"Description",@"Status"];
-   
-    UIBarButtonItem *bar=[[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemAdd target:self action:@selector(addCopies)];
-    self.navigationItem.rightBarButtonItems=[NSArray arrayWithObject:bar];
+    headers=@[@"Publisher",@"Genre",@"Description",@"Status"];
+   [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(reload:) name:@"lent" object:nil];
+    NSLog(@"%d",[tabledatasource count]);
+//UIBarButtonItem *bar=[[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemAdd target:self action:@selector(addCopies)];
+   // self.navigationItem.rightBarButtonItems=[NSArray arrayWithObject:bar];
    
 }
--(void)addCopies
+-(void)reload:(NSNotification*)notification
 {
-    NSInteger i=[[DBManager getSharedInstance] searchCopies:[tabledatasource objectAtIndex:0]];
-    NSString *msg=[NSString stringWithFormat:@"Number of copies available:%d",i];
-    UIAlertView *alertview=[[UIAlertView alloc] initWithTitle:@"Enter Number of copies to add" message:msg delegate:self cancelButtonTitle:@"cancel" otherButtonTitles:@"Add", nil ];
-    alertview.alertViewStyle=UIAlertViewStylePlainTextInput;
-    
-    [alertview show];
-}
--(void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex
-{
-    if (buttonIndex==1) {
-        
    
-    NSInteger i=[[[alertView textFieldAtIndex:0] text] integerValue];
-    
-    if (i>0) {
-        [[DBManager getSharedInstance]updateCopies:[tabledatasource objectAtIndex:0] copies:i];
+    NSInteger copies=[[DBManager getSharedInstance] searchCopies:[tabledatasource objectAtIndex:0]];
+   
+    if (copies>0) {
+        flag=1;
     }
     else
     {
-        UIAlertView *alertview=[[UIAlertView alloc] initWithTitle:@"Alert!!" message:@"Invalid Number" delegate:self cancelButtonTitle:@"OK" otherButtonTitles: nil ];
-        [alertview show];
-    }
+        flag=2;
     }
     
+    [self.tableview reloadRowsAtIndexPaths:[NSArray arrayWithObjects:[NSIndexPath indexPathForRow:1 inSection:0], nil] withRowAnimation:UITableViewRowAnimationFade];
+     [[NSNotificationCenter defaultCenter] removeObserver:self name:@"lent" object:nil];
 }
+
 
 - (void)didReceiveMemoryWarning
 {
@@ -75,109 +67,120 @@
 }
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
-    return 7;
+    return 2;
 }
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {
     static NSString *CellIdentifier = @"tablecell";
     
+    
     tablecell *cell = [tableView
                        dequeueReusableCellWithIdentifier:CellIdentifier];
-    UITableViewCell *cell1=[tableView dequeueReusableCellWithIdentifier:@"Cell"];
-    tablecell *cell2=[tableView dequeueReusableCellWithIdentifier:@"Cell2"];
+   
     if (cell == nil)
     {
         cell = [[tablecell alloc]
                 initWithStyle:UITableViewCellStyleDefault
                 reuseIdentifier:CellIdentifier];
     }
-    if (cell1 == nil)
-    {
-        cell1 = [[UITableViewCell alloc]
-                initWithStyle:UITableViewCellStyleDefault
-                reuseIdentifier:@"Cell"];
-    }
-    if (cell2 == nil)
-    {
-        cell2 = [[tablecell alloc]
-                 initWithStyle:UITableViewCellStyleDefault
-                 reuseIdentifier:@"Cell2"];
-    }
- NSUserDefaults *defaults=[NSUserDefaults standardUserDefaults];
+     NSUserDefaults *defaults=[NSUserDefaults standardUserDefaults];
    
-    switch (indexPath.row) {
-        case 0:
-            
-            cell.imgview.image=[UIImage imageWithData:[defaults objectForKey:[tabledatasource objectAtIndex:0]]];
+    if (indexPath.row==0) {
+       
+    
+            UIImage *image=[UIImage imageWithData:[defaults objectForKey:[tabledatasource objectAtIndex:0]]];
+       
+          
+       /* [cell.imgview.layer setBorderColor: [[UIColor purpleColor] CGColor]];
+        [cell.imgview.layer setBorderWidth: 2.0];
+       cell.imgview.layer.shadowColor = [UIColor purpleColor].CGColor;
+        cell.imgview.layer.shadowOffset = CGSizeMake(-3.0, 3.0);
+        cell.imgview.layer.shadowOpacity = 1;
+        cell.imgview.layer.shadowRadius = 3.0;
+        cell.imgview.clipsToBounds = NO;*/
+        [cell.imgview.layer setBorderColor: [[UIColor whiteColor] CGColor]];
+        [cell.imgview.layer setBorderWidth: 8.0f];
+        cell.imgview.layer.shadowColor = [UIColor blackColor].CGColor;
+        cell.imgview.layer.shadowOffset = CGSizeMake(1.0, 3.0);
+        cell.imgview.layer.shadowOpacity = 0.9f;
+        cell.imgview.layer.shadowRadius = 4.0;
+        cell.imgview.clipsToBounds = NO;
+            cell.imgview.image=image;
             cell.nameLabel.text=[tabledatasource objectAtIndex:1];
             cell.idLabel.text=[tabledatasource objectAtIndex:2];
-           
-            CGSize expsize = [cell.nameLabel.text sizeWithFont:cell.nameLabel.font constrainedToSize:CGSizeMake(165.0, INFINITY) lineBreakMode:cell.nameLabel.lineBreakMode];
-            CGSize expsize2 = [cell.idLabel.text sizeWithFont:cell.idLabel.font constrainedToSize:CGSizeMake(165.0, INFINITY) lineBreakMode:cell.idLabel.lineBreakMode];
+            
+            CGSize expsize = [cell.nameLabel.text sizeWithFont:cell.nameLabel.font constrainedToSize:CGSizeMake(278.0, INFINITY) lineBreakMode:cell.nameLabel.lineBreakMode];
+            CGSize expsize2 = [cell.idLabel.text sizeWithFont:cell.idLabel.font constrainedToSize:CGSizeMake(278.0, INFINITY) lineBreakMode:cell.idLabel.lineBreakMode];
          
-            customnumberofstars = [[DLStarRatingControl alloc] initWithFrame:CGRectMake(88,expsize.height + expsize2.height +20, 140, 41) andStars:5 isFractional:YES];
+            customnumberofstars = [[DLStarRatingControl alloc] initWithFrame:CGRectMake(-25,expsize.height + expsize2.height +15, 140, 41) andStars:5 isFractional:YES];
             customnumberofstars.delegate=self;
             customnumberofstars.backgroundColor=[UIColor clearColor];
             customnumberofstars.rating=[[tabledatasource objectAtIndex:6] doubleValue];
             customnumberofstars.enabled=false;
             [cell.contentView addSubview:customnumberofstars];
+                        
             return cell;
-            break;
-        case 5:
-            if ([[tabledatasource objectAtIndex:7] intValue]>0) {
-                cell1.detailTextLabel.text=@"Available";
-            }
-            else
-            {
-                cell1.detailTextLabel.text=@"Finished";
-            }
-            cell1.textLabel.text=[headers objectAtIndex:indexPath.row-1];
-            return cell1;
-            break;
-         case 6:
-           
-            switch (flag) {
-                case 1:
-                    cell2.borrow.enabled=false;
-                    cell2.ret.enabled=false;
-                    cell2.lend.enabled=true;
-                    break;
-                case 2:
-                    cell2.borrow.enabled=false;
-                    cell2.ret.enabled=true;
-                    cell2.lend.enabled=false;
-                    break;
-                default:
-                    break;
-            }
-            return cell2;
-            break;
-        default:
-            cell1.detailTextLabel.text=[tabledatasource objectAtIndex:indexPath.row+1];
-            cell1.textLabel.text=[headers objectAtIndex:indexPath.row-1];
-            return cell1;
-            break;
     }
-       
+    else
+    {
+        tablecell *cell2 = [tableView
+                           dequeueReusableCellWithIdentifier:@"Cell2"];
+        if (cell2 == nil)
+        {
+            cell2 = [[tablecell alloc]
+                    initWithStyle:UITableViewCellStyleDefault
+                    reuseIdentifier:CellIdentifier];
+        }
+        switch (flag) {
+            case 1:
+                cell2.borrow.enabled=false;
+                cell2.ret.enabled=false;
+                cell2.lend.enabled=true;
+                cell2.borrow.alpha=0.5;
+                cell2.ret.alpha=0.5;
+                break;
+            case 2:
+                cell2.borrow.enabled=false;
+                cell2.ret.enabled=true;
+                cell2.lend.enabled=false;
+                cell2.borrow.alpha=0.5;
+                cell2.lend.alpha=0.5;
+                break;
+            case 3:
+                cell2.borrow.enabled=false;
+                cell2.ret.enabled=false;
+                cell2.lend.enabled=false;
+                cell2.borrow.alpha=0.5;
+                cell2.lend.alpha=0.5;
+                cell2.ret.alpha=0.5;
+            default:
+                break;
+        }
+        [cell2.lend useAlertStyle];
+        [cell2.borrow useAlertStyle];
+        [cell2.ret useAlertStyle];
+        return cell2;
+    }
+    
 }
+
 -(CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
 {
     //UIFont *font=[UIFont systemFontOfSize:14];
     //CGSize expsize = [str sizeWithFont:font constrainedToSize:CGSizeMake(274.0, INFINITY) lineBreakMode:UILineBreakModeWordWrap];
+    static NSString *CellIdentifier = @"tablecell";
+    
+    tablecell *cell = [tableView
+                       dequeueReusableCellWithIdentifier:CellIdentifier];
+    CGSize expsize = [[tabledatasource objectAtIndex:1] sizeWithFont:cell.nameLabel.font constrainedToSize:CGSizeMake(278.0, INFINITY) lineBreakMode:cell.nameLabel.lineBreakMode];
+    CGSize expsize2 = [[tabledatasource objectAtIndex:2] sizeWithFont:cell.idLabel.font constrainedToSize:CGSizeMake(278.0, INFINITY) lineBreakMode:cell.idLabel.lineBreakMode];
+    
     if (indexPath.row==0) {
-        return 130;
+        return 210+expsize.height+expsize2.height+50;
     }
-    else if (indexPath.row==6)
-    {
-        return 54;
-    }
-    else
-    {
-        return 43;
-    }
-    
-    
+    return 54;
+
 }
 -(IBAction)takeBook:(id)sender
 {
@@ -236,7 +239,7 @@
 -(IBAction)doneButtonPressed
 {
     NSInteger row=  [self.pickerview selectedRowInComponent:0];
-    NSLog(@"%@",[pickersource objectAtIndex:row]);
+  
     NSString *issuedate=[[DBManager getSharedInstance] deleteTransaction:[tabledatasource objectAtIndex:0] email:[pickersource objectAtIndex:row]];
     [[DBManager getSharedInstance] updateCopies:[tabledatasource objectAtIndex:0] copies:1];
     
@@ -250,8 +253,7 @@
   
     
     [alertview show];
-    
-    
+    [self.navigationController popViewControllerAnimated:YES];
 }
 -(IBAction)cancel:(id)sender
 {
@@ -276,6 +278,14 @@
 - (void)pickerView:(UIPickerView *)pickerView didSelectRow:(NSInteger)row   inComponent:(NSInteger)component{
     NSLog(@"%@",[pickersource objectAtIndex:row]);
 }
+
+-(IBAction)lendAndBorrow:(id)sender
+{
+    int copies= [[tabledatasource objectAtIndex:7] intValue];
+    if (copies>0) {
+        [self performSegueWithIdentifier:@"" sender:self];
+    }
+}
 -(void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender
 {
     UIButton *button=(UIButton*)sender;
@@ -285,14 +295,30 @@
         lend.pagetitle=@"Lend Book";
         lend.flag=1;
         lend.isbn=[tabledatasource objectAtIndex:0];
+        lend.outputarray=tabledatasource;
     }
     else
     {
     lend.pagetitle=@"Borrow Book";
         lend.isbn=[tabledatasource objectAtIndex:0];
         lend.flag=0;
+        lend.outputarray=tabledatasource;
        // lend.datasource=[[DBManager getSharedInstance]finddetailsbyisbn:[tabledatasource objectAtIndex:0]];
     }
 }
-
+-(void)viewWillAppear:(BOOL)animated
+{
+    
+    [super viewWillAppear:animated];
+    
+    NSInteger copies=[[DBManager getSharedInstance] searchCopies:[tabledatasource objectAtIndex:0]];
+    if (copies>0) {
+        flag=1;
+    }
+    else
+    {
+        flag=2;
+    }
+    [tableview reloadRowsAtIndexPaths:[NSArray arrayWithObjects:[NSIndexPath indexPathForRow:1 inSection:0], nil] withRowAnimation:UITableViewRowAnimationFade];
+}
 @end

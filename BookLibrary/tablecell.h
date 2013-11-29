@@ -7,7 +7,7 @@
 //
 
 #import <UIKit/UIKit.h>
-
+#import "GradientButton.h"
 @interface tablecell : UITableViewCell
 
 @property(nonatomic,retain) IBOutlet UILabel *lbl1;
@@ -18,9 +18,9 @@
 @property(nonatomic,retain) IBOutlet UILabel *startlbl;
 @property(nonatomic,retain) IBOutlet UIProgressView *proview;
 @property (nonatomic,retain) IBOutlet UIButton *button;
-@property (nonatomic,retain) IBOutlet UIButton *borrow;
-@property (nonatomic,retain) IBOutlet UIButton *lend;
-@property (nonatomic,retain) IBOutlet UIButton *ret;
+@property (nonatomic,retain) IBOutlet GradientButton *borrow;
+@property (nonatomic,retain) IBOutlet GradientButton *lend;
+@property (nonatomic,retain) IBOutlet GradientButton *ret;
 @property(nonatomic, retain) IBOutlet UILabel *comlabel;
 @property(nonatomic,retain) IBOutlet UILabel *titlelbl;
 @property(nonatomic,retain) IBOutlet UILabel *desclbl;

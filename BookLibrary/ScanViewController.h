@@ -7,6 +7,7 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "GradientButton.h"
 #import "ZBarSDK.h"
 #import "DBManager.h"
 
@@ -22,12 +23,15 @@
     NSString *imgURL;
     NSString *title;
     NSData *imgdata;
+   
+    
 }
 @property (nonatomic, retain) IBOutlet UIImageView *resultImage;
 @property (nonatomic, retain) IBOutlet UITextField *resultText;
 @property (weak, nonatomic) IBOutlet UIBarButtonItem *sidebarButton;
 @property (weak, nonatomic) IBOutlet UIBarButtonItem *camerabutton;
 @property (nonatomic,assign) NSInteger bookexists;
+@property (nonatomic,retain) IBOutlet GradientButton *proceed;
 
 
 @end

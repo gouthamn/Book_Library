@@ -23,6 +23,7 @@
 @property (nonatomic,retain) NSMutableArray *SelectedIndexes;
 @property (nonatomic,retain) IBOutlet UITableView *tableview;
 @property (nonatomic,retain) MFMailComposeViewController *mailComposer;
+@property (nonatomic,retain) IBOutlet UILabel *lbl;
 -(IBAction)sendMail:(id)sender;
 
 @end

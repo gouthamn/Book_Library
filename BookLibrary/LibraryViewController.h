@@ -10,10 +10,10 @@
 
 @interface libraryViewController : UIViewController<UITableViewDataSource,UITableViewDelegate>
 {
-    NSArray *tabledatasource;
+    NSMutableArray *tabledatasource,*archivedlist;
 }
 @property (weak, nonatomic) IBOutlet UIBarButtonItem *sidebarButton;
-@property (nonatomic,retain) NSArray *tabledatasource;
+@property (nonatomic,retain) NSMutableArray *tabledatasource,*archivedlist;
 @property (nonatomic,retain) IBOutlet UITableView *tableview;
 @end
 

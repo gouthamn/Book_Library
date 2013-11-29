@@ -8,13 +8,15 @@
 
 #import <UIKit/UIKit.h>
 
-@interface lendViewController : UIViewController<UIActionSheetDelegate,UITextFieldDelegate>
+@interface lendViewController : UIViewController<UIActionSheetDelegate,UITextFieldDelegate,UITableViewDelegate,UITableViewDataSource>
 {
+    
     UIPopoverController *popoverController;
     UIActionSheet *menu;
     NSString *pagetitle;
     NSString *isbn;
     int flag;
+
 }
 @property (nonatomic, retain) NSMutableArray *datasource;
 @property (nonatomic, retain) IBOutlet UIDatePicker *datepicker;
@@ -25,6 +27,9 @@
 @property (nonatomic, strong) NSString *isbn;
 @property (nonatomic,assign) int flag;
 @property(nonatomic,strong) IBOutlet UIPopoverController *popoverController;
-
-
+@property (nonatomic,retain) IBOutlet UITableView *tableview;
+@property (nonatomic, retain) NSMutableArray *autocompletemails;
+@property (nonatomic, retain) NSMutableArray *pastemails;
+@property (nonatomic, retain) NSDate *duedate;
+@property (nonatomic, retain) NSMutableArray *outputarray;
 @end

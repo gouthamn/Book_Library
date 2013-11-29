@@ -31,5 +31,13 @@
 -(NSMutableArray*)getTransactionsByStatus:(BOOL)status;
 -(NSMutableArray*)completedTransactions;
 -(NSMutableArray*) findDetailForCategory:(NSString*)category;
+-(NSMutableArray*)emptyISBN;
+-(void)updateISBN:(NSString*)isbn title:(NSString*)title
+           author:(NSString*)author publisher:(NSString*)publisher category:(NSString*)category description:(NSString*)description rating:(NSString*)rating;
+-(void)moveToArchive:(NSString*)isbn;
+-(NSMutableArray*)getUniqueCategories;
+-(NSMutableArray*)getUniqueUsers;
+-(NSMutableArray*)findDetailForArchivedCategory;
+-(int)totalBooks;
 
 @end

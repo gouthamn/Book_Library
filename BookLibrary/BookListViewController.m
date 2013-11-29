@@ -8,13 +8,15 @@
 
 #import "booklistViewController.h"
 #import "tablecell.h"
+#import "DBManager.h"
+#import "BookDetailsViewController.h"
 @interface booklistViewController ()
 
 @end
 
 @implementation booklistViewController
 
-@synthesize tabledatasource,results,category,tableview;
+@synthesize tabledatasource,results,category,tableview,isArchive;
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
     self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
@@ -27,8 +29,8 @@
 - (void)viewDidLoad
 {
     [super viewDidLoad];
-    self.title=[category stringByAppendingString:@" Books"];
-    
+    self.title=category;
+   
 // Do any additional setup after loading the view.
 }
 
@@ -65,11 +67,13 @@ shouldReloadTableForSearchScope:(NSInteger)searchOption
 
 {
     int j=0;
+    results=[[NSMutableArray alloc] init];
     NSMutableArray *searcharray=[[NSMutableArray alloc] init];
     for (int i=0;i<[tabledatasource count]; i++) {
-        [searcharray addObject:[tabledatasource objectAtIndex:i]];
+        [searcharray addObject:[[tabledatasource objectAtIndex:i] objectForKey:@"title"]];
     }
     
+   
     for (NSString *sTemp in searcharray) {
         NSRange range=[sTemp rangeOfString:searchText options:NSCaseInsensitiveSearch];
         if (range.length!=0) {
@@ -77,10 +81,11 @@ shouldReloadTableForSearchScope:(NSInteger)searchOption
         }
         j++;
     }
+  
 }
 -(void)searchDisplayControllerWillBeginSearch:(UISearchDisplayController *)controller
 {
-    self.searchDisplayController.searchResultsTableView.rowHeight=89;
+   self.searchDisplayController.searchResultsTableView.rowHeight=100;
 }
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView
 {
@@ -92,7 +97,7 @@ shouldReloadTableForSearchScope:(NSInteger)searchOption
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
     if ([tableView isEqual:self.searchDisplayController.searchResultsTableView]) {
-        return [results count];
+        return [self.results count];
     }
     return [tabledatasource count];
 }
@@ -101,7 +106,7 @@ shouldReloadTableForSearchScope:(NSInteger)searchOption
 {
     static NSString *CellIdentifier = @"tablecell";
     
-    tablecell *cell = [tableView
+    tablecell *cell = [self.tableview
                        dequeueReusableCellWithIdentifier:CellIdentifier];
     
     if (cell == nil)
@@ -111,22 +116,44 @@ shouldReloadTableForSearchScope:(NSInteger)searchOption
                 reuseIdentifier:CellIdentifier];
     }
      NSUserDefaults *defaults=[NSUserDefaults standardUserDefaults];
+    customnumberofstars = [[DLStarRatingControl alloc] initWithFrame:CGRectMake(70,55,140, 41) andStars:5 isFractional:YES];
+   customnumberofstars.delegate=self;
+    customnumberofstars.backgroundColor=[UIColor clearColor];
+    customnumberofstars.enabled=false;
+   [cell.contentView addSubview:customnumberofstars];
     if ([tableView isEqual:self.searchDisplayController.searchResultsTableView]) {
         
+        if ([defaults objectForKey:[[self.results objectAtIndex:indexPath.row] objectForKey:@"isbn" ]]!=nil) {
+            cell.imgview.image=[UIImage imageWithData:[defaults objectForKey:[[self.results
+                                                                               objectAtIndex:indexPath.row] objectForKey:@"isbn" ]]];
+        }
+        else
+        {
+            cell.imgview.image=[UIImage imageNamed:@"download1.jpeg"];
+        }
+
+       
+        cell.nameLabel.text=[[self.results objectAtIndex:indexPath.row] objectForKey:@"title"] ;
+        NSLog(@"%@",[[self.results objectAtIndex:indexPath.row] objectForKey:@"title"]);
+        cell.idLabel.text=  [[self.results objectAtIndex:indexPath.row] objectForKey:@"author"];
+        customnumberofstars.rating=[[[self.results objectAtIndex:indexPath.row] objectForKey:@"rating" ] doubleValue] ;
     }
     else
-    {            
-          cell.imgview.image=[UIImage imageWithData:[defaults objectForKey:[[self.tabledatasource objectAtIndex:indexPath.row] objectForKey:@"isbn" ]]];
+    {
+        if ([defaults objectForKey:[[self.tabledatasource objectAtIndex:indexPath.row] objectForKey:@"isbn" ]]!=nil) {
+            cell.imgview.image=[UIImage imageWithData:[defaults objectForKey:[[self.tabledatasource objectAtIndex:indexPath.row] objectForKey:@"isbn" ]]];
+        }
+        else
+        {
+            cell.imgview.image=[UIImage imageNamed:@"download1.jpeg"];
+        }
+         
           cell.nameLabel.text=[[self.tabledatasource objectAtIndex:indexPath.row] objectForKey:@"title"] ;
           cell.idLabel.text=  [[self.tabledatasource objectAtIndex:indexPath.row] objectForKey:@"author"];//assigning author name
-          customnumberofstars = [[DLStarRatingControl alloc] initWithFrame:CGRectMake(70,55,140, 41) andStars:5 isFractional:YES];
-          customnumberofstars.delegate=self;
-          customnumberofstars.backgroundColor=[UIColor clearColor];
+          
           customnumberofstars.rating=[[[self.tabledatasource objectAtIndex:indexPath.row] objectForKey:@"rating" ] doubleValue] ;
-          customnumberofstars.enabled=false;
-          [cell.contentView addSubview:customnumberofstars];
-        
     }
+    
     return cell;
 }
 -(void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender
@@ -134,7 +161,7 @@ shouldReloadTableForSearchScope:(NSInteger)searchOption
     
     NSIndexPath *indexPath=[self.tableview indexPathForSelectedRow];
     
-    booklistViewController *bookDetail=segue.destinationViewController;
+    bookdetailsViewController *bookDetail=segue.destinationViewController;
     bookDetail.tabledatasource         =[NSMutableArray arrayWithObjects:[[self.tabledatasource objectAtIndex:indexPath.row] objectForKey:@"isbn" ],
                                        [[self.tabledatasource objectAtIndex:indexPath.row] objectForKey:@"title"],
                                        [[self.tabledatasource objectAtIndex:indexPath.row] objectForKey:@"author"],
@@ -143,29 +170,49 @@ shouldReloadTableForSearchScope:(NSInteger)searchOption
                                        [[self.tabledatasource objectAtIndex:indexPath.row] objectForKey:@"description"],
                                        [[self.tabledatasource objectAtIndex:indexPath.row] objectForKey:@"rating"],
                                        [[self.tabledatasource objectAtIndex:indexPath.row] objectForKey:@"copies"], nil];
-   
+    if (!isArchive) {
+    
+            if ([[[self.tabledatasource objectAtIndex:indexPath.row] objectForKey:@"copies"] isEqualToNumber:[NSNumber numberWithInt:0]]) {
+                bookDetail.flag=2;
+            }
+            else
+            {
+                bookDetail.flag=1;
+            }
+    }
+    else{
+        bookDetail.flag=3;
+    }
 }
 -(NSString*)tableView:(UITableView *)tableView titleForDeleteConfirmationButtonForRowAtIndexPath:(NSIndexPath *)indexPath
 {
+  
     return @"Archive";
 }
-
+-(UITableViewCellEditingStyle)tableView:(UITableView *)tableView editingStyleForRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    if (isArchive) {
+        return UITableViewCellEditingStyleNone;
+    }
+    return UITableViewCellEditingStyleDelete;
+}
+-(UIView*)tableView:(UITableView *)tableView viewForFooterInSection:(NSInteger)section
+{
+    return [UIView new];
+}
 -(void)tableView:(UITableView *)tableView commitEditingStyle:(UITableViewCellEditingStyle)editingStyle forRowAtIndexPath:(NSIndexPath *)indexPath{
     
-    if(editingStyle == UITableViewCellEditingStyleDelete){
-        UIAlertView *alertview=[[UIAlertView alloc] initWithTitle:@"Enter Number of copies" message:@"Number of copies available:1" delegate:self cancelButtonTitle:@"cancel" otherButtonTitles:@"Delete", nil ];
-        alertview.alertViewStyle=UIAlertViewStylePlainTextInput;
-        
-        [alertview show];
-    }
+    
+        if(editingStyle == UITableViewCellEditingStyleDelete){
+        [[DBManager getSharedInstance] moveToArchive:[[self.tabledatasource objectAtIndex:indexPath.row] objectForKey:@"isbn" ]];
+        [tabledatasource removeObjectAtIndex:indexPath.row];
+        [tableView deleteRowsAtIndexPaths:[NSArray arrayWithObject:indexPath] withRowAnimation:UITableViewRowAnimationFade];
+        [[NSNotificationCenter defaultCenter] postNotificationName:@"deleted" object:nil];
+       }
+    
 }
 
--(void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex
-{
-    int i=[[[alertView textFieldAtIndex:0] text] intValue];
-    NSLog(@"%d",i);
-    //[tableView deleteRowsAtIndexPaths:[NSArray arrayWithObject:indexPath] withRowAnimation:UITableViewRowAnimationFade];
-}
+
 -(void)viewWillAppear:(BOOL)animated
 {
     [super viewWillAppear:animated];

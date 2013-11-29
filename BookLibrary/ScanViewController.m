@@ -10,18 +10,20 @@
 #import "SWRevealViewController.h"
 #import "bookdetailsViewController.h"
 #import "lendViewController.h"
+#import "Reachability.h"
 
 @interface ScanViewController ()
 
 @end
 
 @implementation ScanViewController
-@synthesize resultText,resultImage,camerabutton,bookexists;
+@synthesize resultText,resultImage,camerabutton,bookexists,proceed;
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
     self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
     if (self) {
         // Custom initialization
+      
     }
     return self;
 }
@@ -29,6 +31,19 @@
 - (void)viewDidLoad
 {
     [super viewDidLoad];
+   [self camera];
+    
+    
+    
+    Reachability *networkreachability=[Reachability reachabilityForInternetConnection];
+    NetworkStatus networkstatus=[networkreachability currentReachabilityStatus];
+    if (networkstatus==NotReachable) {
+        NSLog(@"offline");
+    }
+    else
+    {
+        NSLog(@"online");
+    }
     resultText.returnKeyType=UIReturnKeyDone;
     resultText.delegate=self;
     self.title = @"Scan Book";
@@ -37,14 +52,15 @@
     // Set the side bar button action. When it's tapped, it'll show up the sidebar.
     _sidebarButton.target = self.revealViewController;
     _sidebarButton.action = @selector(revealToggle:);
-    
+     self.navigationController.navigationBarHidden=FALSE;
     // Set the gesture
     [self.view addGestureRecognizer:self.revealViewController.panGestureRecognizer];
 	// Do any additional setup after loading the view.
-    [self camera];
+    [proceed useAlertStyle];
     
     
 }
+
 -(IBAction)camera
 {
     ZBarReaderViewController *reader = [ZBarReaderViewController new];
@@ -74,6 +90,7 @@
 }
 -(IBAction)submit:(id)sender
 {
+    
     bookexists=[[DBManager getSharedInstance] searchISBN:resultText.text];
      
     if (resultText.text.length==10 || resultText.text.length==13) {
@@ -81,7 +98,7 @@
         {
         UIActionSheet *action=[[UIActionSheet alloc] initWithTitle:@"Choose an Option"
                                                           delegate:self
-                                                 cancelButtonTitle:@"cancel"
+                                                 cancelButtonTitle:@"Cancel"
                                             destructiveButtonTitle:nil
                                                  otherButtonTitles:@"Lend Book",@"Take back your book",@"Register New copy",nil];
         [action showInView:self.view];
@@ -90,9 +107,9 @@
         {
             UIActionSheet *action=[[UIActionSheet alloc] initWithTitle:@"Choose an Option"
                                                               delegate:self
-                                                     cancelButtonTitle:@"cancel"
+                                                     cancelButtonTitle:@"Cancel"
                                                 destructiveButtonTitle:nil
-                                                     otherButtonTitles:@"Lend Book",@"Borrow Book",nil];
+                                                     otherButtonTitles:@"Register and Lend Book",@"Borrow Book",nil];
             [action showInView:self.view];
         }
     }
@@ -109,10 +126,11 @@
 {
      UIStoryboard *storyboard=[UIStoryboard storyboardWithName:@"MainStoryboard" bundle:nil];
      
-    
+     
     // if i=1 book already exists
     if(bookexists ==1)
     {
+        NSMutableArray *arr= [[DBManager getSharedInstance]findDetailsByISBN:resultText.text];
         switch (buttonIndex) {
             case 0:
             {
@@ -124,6 +142,7 @@
                     lend.pagetitle=@"Lend Book";
                     lend.flag=1;
                     lend.isbn=resultText.text;
+                    lend.outputarray=arr;
                     [self.navigationController pushViewController:lend animated:YES];
                 }
                 else
@@ -136,9 +155,7 @@
                 break;
             case 1:
             {
-                NSMutableArray *arr= [[DBManager getSharedInstance]findDetailsByISBN:resultText.text];
-                
-                    
+               
                     bookdetailsViewController *bookdetails=[storyboard instantiateViewControllerWithIdentifier:@"bookdetails"];
                     bookdetails.tabledatasource=arr;
                     bookdetails.flag=2;
@@ -147,7 +164,7 @@
                 break;
             case 2:
             {
-                NSMutableArray *arr= [[DBManager getSharedInstance]findDetailsByISBN:resultText.text];
+                
                 [[DBManager getSharedInstance]updateCopies:resultText.text copies:1];
                     bookdetailsViewController *bookdetails=[storyboard instantiateViewControllerWithIdentifier:@"bookdetails"];
                     bookdetails.tabledatasource=arr;
@@ -165,6 +182,18 @@
         switch (buttonIndex) {
             case 0:
             {
+                Reachability *networkreachability=[Reachability reachabilityForInternetConnection];
+                 NetworkStatus networkstatus=[networkreachability currentReachabilityStatus];
+                if (networkstatus == NotReachable) {
+                    NSLog(@"No Internet conenction");
+                    lendViewController *lend=[storyboard instantiateViewControllerWithIdentifier:@"lend"];
+                    lend.pagetitle=@"Lend Book";
+                    lend.flag=2;
+                    //lend book offline
+                    lend.isbn=resultText.text;
+                    [self.navigationController pushViewController:lend animated:YES];
+                }
+                else{
                 NSString *str=[NSString stringWithFormat:@"https://www.googleapis.com/books/v1/volumes?q=isbn:%@",resultText.text];
                 //0735619670
                 NSURL* jsonURL = [NSURL URLWithString:str];
@@ -173,8 +202,8 @@
                                     jsonURL];
                     [self performSelectorOnMainThread:@selector(fetchedData:)
                                            withObject:data waitUntilDone:YES];
-                    
                 });
+                }
                 
             }
                 break;
@@ -184,6 +213,7 @@
                 lend.pagetitle=@"Borrow Book";
                 lend.isbn=resultText.text;
                 lend.flag=0;
+                
                 [self.navigationController pushViewController:lend animated:YES];
             }
                 break;
@@ -196,7 +226,7 @@
 - (void)fetchedData:(NSData *)responseData{
     //parse out the json data
     
-    NSLog(@"hello");
+    
     NSError* error;
     NSDictionary* json = [NSJSONSerialization
                           JSONObjectWithData:responseData //1
@@ -224,7 +254,7 @@
             rating     = [[  dict objectForKey:@"volumeInfo"] objectForKey:@"averageRating"];
             imgURL     = [[[ dict objectForKey:@"volumeInfo"] objectForKey:@"imageLinks"] objectForKey:@"thumbnail"];
         }
-        
+           NSLog(@"%@",title);
         if(title.length==0)
         {
             title=@"";
@@ -237,7 +267,7 @@
         if(category.length==0)
         {
             
-            category=@"";
+            category=@"Uncategorised";
         }
         if(author.length==0)
         {
@@ -247,7 +277,7 @@
         {
             description=@"";
         }
-        if(rating.length==0)
+        if(!rating)
         {
             rating=@"";
         }
@@ -274,10 +304,11 @@
        }
         
     }
-    
+    else
+    {
         UIAlertView *alert=[[UIAlertView alloc] initWithTitle:@"Alert!!" message:@"Invalid ISBN Number" delegate:self cancelButtonTitle:@"OK" otherButtonTitles:nil];
         [alert show];
-    
+    }
     
 }
 - (void) imagePickerController: (UIImagePickerController*) reader
@@ -293,14 +324,16 @@
     
     // EXAMPLE: do something useful with the barcode data
     resultText.text = symbol.data;
-    
+   
     // EXAMPLE: do something useful with the barcode image
     resultImage.image =
     [info objectForKey: UIImagePickerControllerOriginalImage];
     
     // ADD: dismiss the controller (NB dismiss from the *reader*!)
     //  [reader dismissModalViewControllerAnimated: YES];
+  
     [reader dismissViewControllerAnimated:YES completion:nil];
+      [self performSelector:@selector(submit:) withObject:self];
 }
 
 

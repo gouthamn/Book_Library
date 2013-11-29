@@ -14,9 +14,11 @@
     NSMutableArray *results;
     NSString *category;
     DLStarRatingControl *customnumberofstars;
+    BOOL isArchive;
 }
 @property (nonatomic,retain) NSMutableArray *tabledatasource;
 @property (nonatomic,retain) NSMutableArray *results;
 @property (nonatomic,retain) IBOutlet UITableView *tableview;
 @property (nonatomic,retain) NSString *category;
+@property (nonatomic) BOOL isArchive;
 @end
